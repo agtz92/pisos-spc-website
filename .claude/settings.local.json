@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s http://localhost:3000/reviews)",
+      "Bash(pnpm build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node -e \":*)",
+      "Bash(pnpm next:*)",
+      "Bash(tasklist)",
+      "Bash(curl -s \"http://localhost:3000/\")",
+      "Bash(curl -s \"http://localhost:3000/blog\")",
+      "Bash(rm -rf .next)",
+      "Bash(pnpm dev:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(curl -s http://localhost:56897/reviews)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill /PID 24804 /F)",
+      "Bash(cmd /c \"taskkill /PID 24804 /F\")",
+      "Bash(cmd /c \"taskkill /F /PID 24804\")",
+      "Bash(cmd /c \"netstat -ano | findstr :3000 | findstr LISTEN\")",
+      "Bash(cmd /c \"rmdir /s /q C:\\\\GitHub\\\\pisos-spc\\\\website\\\\.next\")",
+      "Bash(xargs ls:*)",
+      "Bash(grep -v \"^\\\\s*//\")",
+      "Read(//c/GitHub/pisos-spc/**)",
+      "Bash(grep -A 30 '\"\"exports\"\"' \"C:/GitHub/pisos-spc/website/node_modules/eslint-config-next/package.json\")",
+      "Bash(grep '\"\"type\"\"' \"C:/GitHub/pisos-spc/website/node_modules/eslint-config-next/package.json\")",
+      "Bash(node -e \"const r=require\\(''./eslint-report.json''\\);for\\(const f of r\\){for\\(const m of f.messages\\){console.log\\(f.filePath.split\\(''website''\\).pop\\(\\)+'':''+m.line+'' [''+m.ruleId+''] ''+m.message\\)}}\")",
+      "Bash(grep -r modern /c/GitHub/pisos-spc/website/app --include=*.ts --include=*.tsx -l)",
+      "Bash(grep -r modern /c/GitHub/pisos-spc/website/components --include=*.ts --include=*.tsx -l)",
+      "Bash(xargs grep:*)",
+      "Bash(find /c/GitHub/pisos-spc/website -type f \\\\\\(-name *product* -o -name *categor* -o -name *chip* \\\\\\))",
+      "Bash(find /c/GitHub/pisos-spc/website -path */node_modules -prune -o -type f \\\\\\(-name *product* -o -name *page* \\\\\\) -print)",
+      "Bash(find /c/GitHub/pisos-spc/website -path */node_modules -prune -o -path */.next -prune -o -type f -name page.tsx -print)",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
+    ]
+  }
+}
