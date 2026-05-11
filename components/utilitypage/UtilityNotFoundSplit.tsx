@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { resolveMediaUrl } from '@/lib/graphql';
 import { t, UtilityCta, type UtilityLayoutProps } from './sections';
 
@@ -54,7 +55,7 @@ export default function UtilityNotFoundSplit({ page }: UtilityLayoutProps) {
           )}
           <div className="mt-8 flex flex-wrap gap-3">
             <UtilityCta page={page} />
-            <a
+            <Link
               href="/"
               className="inline-flex items-center gap-2 px-5 py-3 no-underline"
               style={{
@@ -67,7 +68,7 @@ export default function UtilityNotFoundSplit({ page }: UtilityLayoutProps) {
               }}
             >
               Back home
-            </a>
+            </Link>
           </div>
         </div>
 

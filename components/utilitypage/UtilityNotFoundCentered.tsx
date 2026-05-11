@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { t, UtilityCta, type UtilityLayoutProps } from './sections';
 
 export default function UtilityNotFoundCentered({ page }: UtilityLayoutProps) {
@@ -48,7 +49,7 @@ export default function UtilityNotFoundCentered({ page }: UtilityLayoutProps) {
       )}
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <UtilityCta page={page} />
-        <a
+        <Link
           href="/"
           className="inline-flex items-center gap-2 px-5 py-3 no-underline"
           style={{
@@ -61,7 +62,7 @@ export default function UtilityNotFoundCentered({ page }: UtilityLayoutProps) {
           }}
         >
           Back home
-        </a>
+        </Link>
       </div>
     </article>
   );
