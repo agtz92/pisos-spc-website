@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ModernTemplateColors } from '../config';
+import { MobileNav } from '../MobileNav';
 import { ModernPolygonMark } from './ModernPolygonMark';
 
 function UtilityIcon({ label, colors }: { label: string; colors: ModernTemplateColors }) {
@@ -86,7 +87,7 @@ export function ModernHeader({ siteName, colors, copy, navItems, today }: Modern
 
           <div className="flex flex-col items-start gap-4 lg:items-end">
             {navItems.length > 0 && (
-              <nav className="flex flex-wrap items-center gap-y-2 text-sm font-bold">
+              <nav className="hidden md:flex flex-wrap items-center gap-y-2 text-sm font-bold">
                 {navItems.map((item, index) => (
                   <div key={item.href} className="flex items-center">
                     <Link
@@ -105,8 +106,31 @@ export function ModernHeader({ siteName, colors, copy, navItems, today }: Modern
             )}
 
             <div className="flex items-center gap-3">
-              <UtilityIcon label="Profile" colors={colors} />
-              <UtilityIcon label="Menu" colors={colors} />
+              <span className="hidden md:inline-flex">
+                <UtilityIcon label="Profile" colors={colors} />
+              </span>
+              <span className="hidden md:inline-flex">
+                <UtilityIcon label="Menu" colors={colors} />
+              </span>
+              <MobileNav
+                triggerClassName="md:hidden"
+                navItems={navItems}
+                siteName={siteName}
+                panelEyebrow={copy.headerTagline}
+                theme={{
+                  buttonBackground: colors.panelBackground,
+                  buttonBorder: `color-mix(in srgb, ${colors.accent} 18%, transparent)`,
+                  buttonInk: colors.accent,
+                  panelBackground: colors.panelBackground,
+                  panelBorder: 'rgba(22, 18, 24, 0.08)',
+                  ink: colors.ink,
+                  mutedText: colors.mutedText,
+                  accent: colors.accent,
+                  accentStrong: colors.accentStrong,
+                  linkHoverBackground: `color-mix(in srgb, ${colors.accent} 8%, transparent)`,
+                  linkFontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
+                }}
+              />
             </div>
           </div>
         </div>

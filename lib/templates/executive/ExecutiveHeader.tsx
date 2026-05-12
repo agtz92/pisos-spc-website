@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ExecutiveTemplateColors } from '../config';
+import { MobileNav } from '../MobileNav';
 
 function LogoMark({ color }: { color: string }) {
   return (
@@ -48,7 +49,7 @@ export function ExecutiveHeader({ siteName, colors, navItems }: ExecutiveHeaderP
         </Link>
 
         {navItems.length > 0 && (
-          <span aria-hidden style={{ width: 1, height: 22, background: colors.panelBorder, margin: '0 1.5rem', flexShrink: 0 }} />
+          <span aria-hidden className="hidden md:block" style={{ width: 1, height: 22, background: colors.panelBorder, margin: '0 1.5rem', flexShrink: 0 }} />
         )}
 
         {navItems.length > 0 && (
@@ -65,6 +66,24 @@ export function ExecutiveHeader({ siteName, colors, navItems }: ExecutiveHeaderP
             ))}
           </nav>
         )}
+
+        <MobileNav
+          triggerClassName="md:hidden ml-auto"
+          navItems={navItems}
+          siteName={siteName}
+          theme={{
+            buttonBackground: colors.panelBackground,
+            buttonBorder: colors.panelBorder,
+            buttonInk: colors.ink,
+            panelBackground: colors.headerBackground,
+            panelBorder: colors.panelBorder,
+            ink: colors.ink,
+            mutedText: colors.mutedText,
+            accent: colors.accent,
+            accentStrong: colors.accentStrong,
+            linkHoverBackground: colors.mutedPanelBackground,
+          }}
+        />
       </div>
     </header>
   );

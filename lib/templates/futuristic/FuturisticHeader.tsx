@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getTemplateConfig } from '../config';
+import { MobileNav } from '../MobileNav';
 import { FuturisticFramePill } from './FuturisticFramePill';
 
 type FuturisticColors = ReturnType<typeof getTemplateConfig<'futuristic'>>['colors'];
@@ -57,12 +58,33 @@ export function FuturisticHeader({ siteName, colors, navItems }: FuturisticHeade
           <div className="flex flex-wrap items-center gap-2">
             <FuturisticFramePill colors={colors}>{String(navItems.length).padStart(2, '0')} Modules</FuturisticFramePill>
             <FuturisticFramePill colors={colors}>Config-Driven Theme</FuturisticFramePill>
+            <MobileNav
+              triggerClassName="md:hidden"
+              navItems={navItems}
+              siteName={siteName}
+              panelEyebrow="Adaptive Interface"
+              theme={{
+                buttonBackground: colors.panelBackground,
+                buttonBorder: colors.panelBorder,
+                buttonInk: colors.ink,
+                panelBackground: colors.headerBackground,
+                panelBorder: colors.panelBorder,
+                ink: colors.ink,
+                mutedText: colors.mutedText,
+                accent: colors.accent,
+                accentStrong: colors.accentStrong,
+                linkHoverBackground: colors.panelBackground,
+                linkFontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
+                linkLetterSpacing: '0.08em',
+                linkTextTransform: 'uppercase',
+              }}
+            />
           </div>
         </div>
 
         {navItems.length > 0 && (
           <nav
-            className="futuristic-nav-wrap flex flex-wrap items-center gap-2 rounded-[4px] p-2"
+            className="futuristic-nav-wrap hidden md:flex flex-wrap items-center gap-2 rounded-[4px] p-2"
             style={{ border: `1px solid ${colors.panelBorder}`, background: colors.panelBackground }}
           >
             {navItems.map((item) => (

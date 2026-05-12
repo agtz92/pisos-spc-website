@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getTemplateConfig } from '../config';
+import { MobileNav } from '../MobileNav';
 import { RetroPanelBox } from './RetroPanelBox';
 
 type RetroColors = ReturnType<typeof getTemplateConfig<'retro'>>['colors'];
@@ -73,11 +74,32 @@ export function RetroHeader({ siteName, colors, copy, navItems, currentYear }: R
             <div>
               <div className="flex items-start gap-4">
                 <RetroStamp colors={colors} />
-                <div>
+                <div className="flex-1">
                   <p style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: colors.mutedText }}>
                     {copy.eyebrow}
                   </p>
                 </div>
+                <MobileNav
+                  triggerClassName="lg:hidden"
+                  navItems={navItems}
+                  siteName={siteName}
+                  panelEyebrow={copy.eyebrow}
+                  theme={{
+                    buttonBackground: colors.panelBackground,
+                    buttonBorder: colors.ink,
+                    buttonInk: colors.ink,
+                    panelBackground: colors.panelBackground,
+                    panelBorder: colors.ink,
+                    ink: colors.ink,
+                    mutedText: colors.mutedText,
+                    accent: colors.highlight,
+                    accentStrong: colors.highlight,
+                    linkHoverBackground: colors.highlight,
+                    linkFontFamily: '"Arial Narrow", "Trebuchet MS", sans-serif',
+                    linkLetterSpacing: '0.12em',
+                    linkTextTransform: 'uppercase',
+                  }}
+                />
               </div>
               <div className="mt-5">
                 <p style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: colors.mutedText }}>
@@ -164,7 +186,7 @@ export function RetroHeader({ siteName, colors, copy, navItems, currentYear }: R
 
             {navItems.length > 0 && (
               <nav
-                className="mt-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border-t"
+                className="mt-auto hidden lg:grid grid-cols-6 border-t"
                 style={{ background: colors.navBackground, borderColor: colors.ink }}
               >
                 {navItems.map((item) => (
