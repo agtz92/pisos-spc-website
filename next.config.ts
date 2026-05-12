@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'backend-cms-bulk-website-generator.onrender.com',
+        pathname: '/media/**',
+      },
+      {
+        protocol: 'https',
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
