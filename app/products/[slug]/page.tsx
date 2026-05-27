@@ -1,5 +1,6 @@
 import { getProduct, getProducts, resolveMediaUrl } from '@/lib/graphql';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import SpecificationsTable from '@/components/SpecificationsTable';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -95,6 +96,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           )}
         </div>
       </div>
+
+      <SpecificationsTable groups={product.specifications ?? []} />
     </div>
   );
 }

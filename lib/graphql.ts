@@ -223,6 +223,12 @@ export interface Recipe {
 
 // ── Product types ─────────────────────────────────────────────────────────────
 
+export interface SpecGroup {
+  name: string;
+  headers: string[];
+  rows: string[][];
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -237,6 +243,8 @@ export interface Product {
   publishedAt: string | null;
   createdAt: string;
   category: Category | null;
+  /** Only populated by getProduct (detail). List queries omit this field for payload size. */
+  specifications?: SpecGroup[];
 }
 
 // ── Listing types ─────────────────────────────────────────────────────────────
@@ -336,6 +344,11 @@ const PRODUCT_LIST_FIELDS = `
   category { id name slug }
 `;
 
+const PRODUCT_DETAIL_FIELDS = `
+  ${PRODUCT_LIST_FIELDS}
+  specifications { name headers rows }
+`;
+
 export async function getProducts(options?: { categorySlug?: string }): Promise<Product[]> {
   const data = await gql<{ products: Product[] }>(
     `query Products($categorySlug: String) {
@@ -349,7 +362,7 @@ export async function getProducts(options?: { categorySlug?: string }): Promise<
 export async function getProduct(slug: string): Promise<Product | null> {
   const data = await gql<{ product: Product | null }>(
     `query Product($slug: String!) {
-      product(slug: $slug) { ${PRODUCT_LIST_FIELDS} }
+      product(slug: $slug) { ${PRODUCT_DETAIL_FIELDS} }
     }`,
     { slug },
   );
