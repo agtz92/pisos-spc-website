@@ -186,6 +186,22 @@ export async function getTenant(): Promise<TenantInfo | null> {
   return data.tenant;
 }
 
+// ── Redirects ────────────────────────────────────────────────────────────────
+
+export interface PublicRedirect {
+  fromPath: string;
+  toPath: string;
+  statusCode: number;
+  isWildcard: boolean;
+}
+
+export async function getRedirects(): Promise<PublicRedirect[]> {
+  const data = await gql<{ redirects: PublicRedirect[] }>(
+    `query Redirects { redirects { fromPath toPath statusCode isWildcard } }`,
+  );
+  return data.redirects ?? [];
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function resolveMediaUrl(url: string | null | undefined): string | null {
