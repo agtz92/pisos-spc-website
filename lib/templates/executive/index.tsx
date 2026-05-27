@@ -46,7 +46,7 @@ export function ExecutiveLayout({ siteName, enabledModules, savedConfig, childre
     >
       <ExecutiveHeader siteName={siteName} colors={colors} navItems={navItems} />
 
-      <main className="executive-content relative z-10 flex-1 w-full">
+      <main className="executive-content relative z-10 flex-1 w-full pb-16 sm:pb-24">
         {children}
       </main>
 

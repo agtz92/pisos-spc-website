@@ -12,7 +12,7 @@ interface FuturisticContentFrameProps {
 
 export function FuturisticContentFrame({ children, colors, mainContainerClassName, footerPrefix }: FuturisticContentFrameProps) {
   return (
-    <main className={mainContainerClassName}>
+    <main className={`${mainContainerClassName} pb-16 sm:pb-24`}>
       <section
         className="overflow-hidden rounded-[4px] border"
         style={{ borderColor: colors.panelBorder, background: colors.panelBackground, boxShadow: `0 0 54px ${colors.accentBorder}` }}

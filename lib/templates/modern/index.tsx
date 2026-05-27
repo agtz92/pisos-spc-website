@@ -80,7 +80,7 @@ export function ModernLayout({ siteName, enabledModules, savedConfig, children }
       <div className="relative flex min-h-full flex-col">
         <ModernHeader siteName={siteName} colors={colors} copy={copy} navItems={navItems} today={today} />
 
-        <main className="modern-content relative z-10 flex-1 w-full">
+        <main className="modern-content relative z-10 flex-1 w-full pb-16 sm:pb-24">
           {children}
         </main>
 

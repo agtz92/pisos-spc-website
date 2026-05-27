@@ -68,7 +68,7 @@ export function RetroLayout({ siteName, enabledModules, savedConfig, children }:
           currentYear={currentYear}
         />
 
-        <main className="relative z-10 flex-1 px-3 pb-8 sm:px-5 sm:pb-10">
+        <main className="relative z-10 flex-1 px-3 pb-16 sm:px-5 sm:pb-24">
           <RetroPanelBox
             className="retro-main-panel mx-auto max-w-7xl"
             ink={colors.ink}
