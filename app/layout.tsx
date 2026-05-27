@@ -42,10 +42,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     TemplateLayout = ModernLayout;
   }
 
+  const customHead      = tenant?.customCodeHead ?? '';
+  const customBodyStart = tenant?.customCodeBodyStart ?? '';
+  const customBodyEnd   = tenant?.customCodeBodyEnd ?? '';
+
   return (
     <html lang="en" className="h-full antialiased">
+      <head>
+        {customHead ? (
+          <span suppressHydrationWarning dangerouslySetInnerHTML={{ __html: customHead }} />
+        ) : null}
+      </head>
       <body className="min-h-full">
+        {customBodyStart ? (
+          <div suppressHydrationWarning dangerouslySetInnerHTML={{ __html: customBodyStart }} />
+        ) : null}
         <TemplateLayout {...layoutProps} />
+        {customBodyEnd ? (
+          <div suppressHydrationWarning dangerouslySetInnerHTML={{ __html: customBodyEnd }} />
+        ) : null}
       </body>
     </html>
   );

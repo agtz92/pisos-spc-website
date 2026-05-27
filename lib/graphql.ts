@@ -164,12 +164,23 @@ export interface TenantInfo {
   template: string;
   templateConfig: Record<string, unknown> | null;
   modules: string[];
+  customCodeHead: string;
+  customCodeBodyStart: string;
+  customCodeBodyEnd: string;
 }
 
 export async function getTenant(): Promise<TenantInfo | null> {
   const data = await gql<{ tenant: TenantInfo | null }>(
     `query Tenant {
-      tenant { name template templateConfig modules }
+      tenant {
+        name
+        template
+        templateConfig
+        modules
+        customCodeHead
+        customCodeBodyStart
+        customCodeBodyEnd
+      }
     }`,
   );
   return data.tenant;
