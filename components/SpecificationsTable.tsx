@@ -21,31 +21,24 @@ export default function SpecificationsTable({ groups }: Props) {
   if (visible.length === 0) return null;
 
   return (
-    <section className="mt-12" data-product-specs>
-      <h2
-        className="mb-6 text-xl font-bold"
-        style={{ color: 'var(--template-ink, #161218)' }}
-      >
-        Specifications
-      </h2>
-      <div className="space-y-8">
-        {visible.map((group, gi) => {
-          const isKeyValue =
-            group.headers.length === 2 &&
-            group.headers.every((h, i) =>
-              (h || '').trim().toLowerCase() === KEY_VALUE_HEADERS[i],
-            );
+    <section className="mt-12 space-y-8" data-product-specs>
+      {visible.map((group, gi) => {
+        const isKeyValue =
+          group.headers.length === 2 &&
+          group.headers.every((h, i) =>
+            (h || '').trim().toLowerCase() === KEY_VALUE_HEADERS[i],
+          );
 
-          return (
-            <div key={gi}>
-              {group.name && (
-                <h3
-                  className="mb-3 text-sm font-semibold uppercase tracking-wider"
-                  style={{ color: 'var(--template-muted-text, #6b7280)' }}
-                >
-                  {group.name}
-                </h3>
-              )}
+        return (
+          <div key={gi}>
+            {group.name && (
+              <h3
+                className="mb-3 text-lg font-bold"
+                style={{ color: 'var(--template-ink, #161218)' }}
+              >
+                {group.name}
+              </h3>
+            )}
               <div
                 className="overflow-x-auto rounded-lg border"
                 style={{ borderColor: 'var(--template-panel-border, #e5e7eb)' }}
