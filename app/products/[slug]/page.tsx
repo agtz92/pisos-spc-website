@@ -45,5 +45,5 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   else if (detailVariant === 'gallery')      detail = <ProductDetailGallery     product={product} stockConfig={tenant} />;
   else                                       detail = <ProductDetailSplit       product={product} stockConfig={tenant} />;
 
-  return <div style={moduleStyle}>{detail}</div>;
+  return <div style={moduleStyle} className="px-4 sm:px-6">{detail}</div>;
 }
