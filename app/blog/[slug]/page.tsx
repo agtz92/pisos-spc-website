@@ -4,6 +4,8 @@ import { getPost, getPosts, getTenant } from '@/lib/graphql';
 import { getModuleSettings, getLayoutVariant } from '@/lib/templates/moduleLayout';
 import BlogDetailStandard from '@/components/blog/detail/BlogDetailStandard';
 import BlogDetailImmersive from '@/components/blog/detail/BlogDetailImmersive';
+import BlogDetailSidebar from '@/components/blog/detail/BlogDetailSidebar';
+import BlogDetailMinimal from '@/components/blog/detail/BlogDetailMinimal';
 
 export const revalidate = 60;
 
@@ -50,8 +52,10 @@ export default async function BlogPostPage({
   const detailVariant = getLayoutVariant(layout, 'detailVariant', 'standard');
 
   let detail: React.ReactNode;
-  if (detailVariant === 'immersive') detail = <BlogDetailImmersive post={post} />;
-  else                               detail = <BlogDetailStandard  post={post} />;
+  if      (detailVariant === 'immersive') detail = <BlogDetailImmersive post={post} />;
+  else if (detailVariant === 'sidebar')   detail = <BlogDetailSidebar   post={post} />;
+  else if (detailVariant === 'minimal')   detail = <BlogDetailMinimal    post={post} />;
+  else                                    detail = <BlogDetailStandard   post={post} />;
 
   return <div style={moduleStyle}>{detail}</div>;
 }

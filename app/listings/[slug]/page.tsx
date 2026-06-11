@@ -2,6 +2,8 @@ import { getListing, getListings, getTenant } from '@/lib/graphql';
 import { getModuleSettings, getLayoutVariant } from '@/lib/templates/moduleLayout';
 import ListingDetailStandard from '@/components/listings/detail/ListingDetailStandard';
 import ListingDetailBrochure from '@/components/listings/detail/ListingDetailBrochure';
+import ListingDetailGallery from '@/components/listings/detail/ListingDetailGallery';
+import ListingDetailSheet from '@/components/listings/detail/ListingDetailSheet';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -35,8 +37,10 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
   const detailVariant = getLayoutVariant(layout, 'detailVariant', 'standard');
 
   let detail: React.ReactNode;
-  if (detailVariant === 'brochure') detail = <ListingDetailBrochure listing={listing} />;
-  else                              detail = <ListingDetailStandard listing={listing} />;
+  if (detailVariant === 'brochure')   detail = <ListingDetailBrochure listing={listing} />;
+  else if (detailVariant === 'gallery') detail = <ListingDetailGallery listing={listing} />;
+  else if (detailVariant === 'sheet')   detail = <ListingDetailSheet listing={listing} />;
+  else                                detail = <ListingDetailStandard listing={listing} />;
 
   return <div style={moduleStyle}>{detail}</div>;
 }

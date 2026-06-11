@@ -2,6 +2,8 @@ import { getReview, getReviews, getTenant } from '@/lib/graphql';
 import { getModuleSettings, getLayoutVariant } from '@/lib/templates/moduleLayout';
 import ReviewDetailStandard from '@/components/reviews/detail/ReviewDetailStandard';
 import ReviewDetailMagazine from '@/components/reviews/detail/ReviewDetailMagazine';
+import ReviewDetailVerdict from '@/components/reviews/detail/ReviewDetailVerdict';
+import ReviewDetailCompact from '@/components/reviews/detail/ReviewDetailCompact';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -35,8 +37,10 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
   const detailVariant = getLayoutVariant(layout, 'detailVariant', 'standard');
 
   let detail: React.ReactNode;
-  if (detailVariant === 'magazine') detail = <ReviewDetailMagazine review={review} />;
-  else                              detail = <ReviewDetailStandard review={review} />;
+  if (detailVariant === 'magazine')      detail = <ReviewDetailMagazine review={review} />;
+  else if (detailVariant === 'verdict')  detail = <ReviewDetailVerdict review={review} />;
+  else if (detailVariant === 'compact')  detail = <ReviewDetailCompact review={review} />;
+  else                                   detail = <ReviewDetailStandard review={review} />;
 
   return <div style={moduleStyle}>{detail}</div>;
 }

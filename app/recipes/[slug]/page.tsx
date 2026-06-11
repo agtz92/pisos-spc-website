@@ -2,6 +2,8 @@ import { getRecipe, getRecipes, getTenant } from '@/lib/graphql';
 import { getModuleSettings, getLayoutVariant } from '@/lib/templates/moduleLayout';
 import RecipeDetailStandard from '@/components/recipes/detail/RecipeDetailStandard';
 import RecipeDetailHero from '@/components/recipes/detail/RecipeDetailHero';
+import RecipeDetailMagazine from '@/components/recipes/detail/RecipeDetailMagazine';
+import RecipeDetailCookmode from '@/components/recipes/detail/RecipeDetailCookmode';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -41,8 +43,10 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
   const detailVariant = getLayoutVariant(layout, 'detailVariant', 'standard');
 
   let detail: React.ReactNode;
-  if (detailVariant === 'hero') detail = <RecipeDetailHero     recipe={recipe} />;
-  else                          detail = <RecipeDetailStandard recipe={recipe} />;
+  if      (detailVariant === 'hero')     detail = <RecipeDetailHero     recipe={recipe} />;
+  else if (detailVariant === 'magazine') detail = <RecipeDetailMagazine recipe={recipe} />;
+  else if (detailVariant === 'cookmode') detail = <RecipeDetailCookmode recipe={recipe} />;
+  else                                   detail = <RecipeDetailStandard recipe={recipe} />;
 
   return <div style={moduleStyle}>{detail}</div>;
 }
