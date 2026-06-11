@@ -3,7 +3,7 @@ import ListingCard from '@/components/ListingCard';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 export const metadata: Metadata = { title: 'For Rent' };
 
 export default async function ForRentPage() {

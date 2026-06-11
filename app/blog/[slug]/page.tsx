@@ -7,7 +7,7 @@ import BlogDetailImmersive from '@/components/blog/detail/BlogDetailImmersive';
 import BlogDetailSidebar from '@/components/blog/detail/BlogDetailSidebar';
 import BlogDetailMinimal from '@/components/blog/detail/BlogDetailMinimal';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   try {

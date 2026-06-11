@@ -3,6 +3,15 @@ const TENANT_SLUG = process.env.NEXT_PUBLIC_TENANT_SLUG ?? '';
 
 export const GRAPHQL_URL = `${API_BASE}/t/${TENANT_SLUG}/graphql/`;
 
+/**
+ * Hard ceiling for a single GraphQL round-trip. Without it, a hung/asleep
+ * backend (e.g. a cold Render instance) would block the render indefinitely.
+ * Generous enough to survive a cold start, but bounded so failure is graceful:
+ * callers that ``.catch()`` degrade to an empty/404 state instead of hanging.
+ * Override with ``GQL_TIMEOUT_MS`` if the backend's cold start runs longer.
+ */
+const GQL_TIMEOUT_MS = Number(process.env.GQL_TIMEOUT_MS ?? 30_000);
+
 export interface Category {
   id: string;
   name: string;
@@ -46,13 +55,41 @@ export interface Post {
   seo: Seo;
 }
 
-async function gql<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
-  const res = await fetch(GRAPHQL_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables }),
-    next: { revalidate: 60 },
-  });
+/**
+ * Cache tags let the backend invalidate only the affected pages via
+ * ``revalidateTag`` (see ``app/api/revalidate/route.ts``). Each query passes
+ * the tag(s) matching the Django model(s) it reads, so e.g. saving a Product
+ * only rebuilds product/landing/home pages — not the blog.
+ *
+ * ``revalidate: 86400`` is just a 1-day safety net in case a webhook is missed
+ * (backend asleep, network blip). Normal freshness comes from the on-demand
+ * tag invalidation, not from time-based expiry.
+ */
+async function gql<T>(
+  query: string,
+  variables?: Record<string, unknown>,
+  tags?: string[],
+): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), GQL_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(GRAPHQL_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables }),
+      next: { revalidate: 86400, tags: tags ?? [] },
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error(`GraphQL request timed out after ${GQL_TIMEOUT_MS}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!res.ok) {
     throw new Error(`GraphQL request failed: ${res.status}`);
@@ -66,6 +103,23 @@ async function gql<T>(query: string, variables?: Record<string, unknown>): Promi
 
   return json.data as T;
 }
+
+/**
+ * Canonical cache-tag names, one per content type. These MUST stay in sync
+ * with the model→tag map in ``app/api/revalidate/route.ts`` and the Django
+ * signal in ``backend/content/signals.py`` (which sends the lowercased model
+ * name; the route maps it to one of these tags).
+ */
+export const TAGS = {
+  blog: 'blog',
+  recipes: 'recipes',
+  products: 'products',
+  listings: 'listings',
+  reviews: 'reviews',
+  landing: 'landing',
+  utility: 'utility',
+  tenant: 'tenant',
+} as const;
 
 // ── Field fragments ───────────────────────────────────────────────────────────
 
@@ -108,6 +162,7 @@ export async function getPosts(options?: {
       featured: options?.featured ?? null,
       limit: options?.limit ?? null,
     },
+    [TAGS.blog],
   );
   return data.posts;
 }
@@ -118,6 +173,7 @@ export async function getPost(slug: string): Promise<Post | null> {
       post(slug: $slug) { ${POST_FIELDS} }
     }`,
     { slug },
+    [TAGS.blog],
   );
   return data.post;
 }
@@ -128,6 +184,8 @@ export async function getCategories(module?: string): Promise<Category[]> {
     `query Categories {
       categories${filter} { id name slug }
     }`,
+    undefined,
+    [module ?? 'taxonomy'],
   );
   return data.categories;
 }
@@ -138,6 +196,8 @@ export async function getTags(module?: string): Promise<Tag[]> {
     `query Tags {
       tags${filter} { id name slug }
     }`,
+    undefined,
+    [module ?? 'taxonomy'],
   );
   return data.tags;
 }
@@ -147,6 +207,8 @@ export async function getAuthors(): Promise<Author[]> {
     `query Authors {
       authors { id name slug bio avatar }
     }`,
+    undefined,
+    [TAGS.blog, TAGS.reviews],
   );
   return data.authors;
 }
@@ -157,6 +219,7 @@ export async function getAuthor(slug: string): Promise<Author | null> {
       author(slug: $slug) { id name slug bio avatar }
     }`,
     { slug },
+    [TAGS.blog, TAGS.reviews],
   );
   return data.author;
 }
@@ -210,6 +273,8 @@ export async function getTenant(): Promise<TenantInfo | null> {
         productOutOfStockColor
       }
     }`,
+    undefined,
+    [TAGS.tenant],
   );
   return data.tenant;
 }
@@ -226,6 +291,8 @@ export interface PublicRedirect {
 export async function getRedirects(): Promise<PublicRedirect[]> {
   const data = await gql<{ redirects: PublicRedirect[] }>(
     `query Redirects { redirects { fromPath toPath statusCode isWildcard } }`,
+    undefined,
+    [TAGS.tenant],
   );
   return data.redirects ?? [];
 }
@@ -387,6 +454,7 @@ export async function getRecipes(options?: { categorySlug?: string; limit?: numb
       recipes(categorySlug: $categorySlug, limit: $limit) { ${RECIPE_LIST_FIELDS} }
     }`,
     { categorySlug: options?.categorySlug ?? null, limit: options?.limit ?? null },
+    [TAGS.recipes],
   );
   return data.recipes;
 }
@@ -397,6 +465,7 @@ export async function getRecipe(slug: string): Promise<Recipe | null> {
       recipe(slug: $slug) { ${RECIPE_FIELDS} }
     }`,
     { slug },
+    [TAGS.recipes],
   );
   return data.recipe;
 }
@@ -430,6 +499,7 @@ export async function getProducts(options?: {
       featured: options?.featured ?? null,
       limit: options?.limit ?? null,
     },
+    [TAGS.products],
   );
   return data.products;
 }
@@ -440,6 +510,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
       product(slug: $slug) { ${PRODUCT_DETAIL_FIELDS} }
     }`,
     { slug },
+    [TAGS.products],
   );
   return data.product;
 }
@@ -479,6 +550,7 @@ export async function getListings(options?: {
       propertyType: options?.propertyType ?? null,
       limit: options?.limit ?? null,
     },
+    [TAGS.listings],
   );
   return data.listings;
 }
@@ -489,6 +561,7 @@ export async function getListing(slug: string): Promise<Listing | null> {
       listing(slug: $slug) { ${LISTING_FIELDS} }
     }`,
     { slug },
+    [TAGS.listings],
   );
   return data.listing;
 }
@@ -526,6 +599,7 @@ export async function getReviews(options?: {
       orderByRating: options?.orderByRating ?? null,
       limit: options?.limit ?? null,
     },
+    [TAGS.reviews],
   );
   return data.reviews;
 }
@@ -536,6 +610,7 @@ export async function getReview(slug: string): Promise<Review | null> {
       review(slug: $slug) { ${REVIEW_FIELDS} }
     }`,
     { slug },
+    [TAGS.reviews],
   );
   return data.review;
 }
@@ -918,6 +993,8 @@ export async function getLandingPages(): Promise<LandingPageSummary[]> {
         rootPath canonicalUrl includeInSitemap
       }
     }`,
+    undefined,
+    [TAGS.landing],
   );
   // Sitemap consumers filter on includeInSitemap; UI consumers ignore it.
   return data.landingPages;
@@ -985,6 +1062,7 @@ export async function getLandingPage(slug: string): Promise<LandingPage | null> 
       landingPage(slug: $slug) { ${LANDING_PAGE_FIELDS} }
     }`,
     { slug },
+    [TAGS.landing],
   );
   return data.landingPage;
 }
@@ -994,6 +1072,8 @@ export async function getHomepageLandingPage(): Promise<LandingPage | null> {
     `query HomepageLandingPage {
       homepageLandingPage { ${LANDING_PAGE_FIELDS} }
     }`,
+    undefined,
+    [TAGS.landing],
   );
   return data.homepageLandingPage;
 }
@@ -1004,6 +1084,7 @@ export async function getLandingPageByRootSlug(slug: string): Promise<LandingPag
       landingPageByRootSlug(slug: $slug) { ${LANDING_PAGE_FIELDS} }
     }`,
     { slug },
+    [TAGS.landing],
   );
   return data.landingPageByRootSlug;
 }
@@ -1104,6 +1185,7 @@ export async function getUtilityPages(kind?: string): Promise<UtilityPageSummary
       }
     }`,
     kind ? { kind } : {},
+    [TAGS.utility],
   );
   return data.utilityPages;
 }
@@ -1114,6 +1196,7 @@ export async function getUtilityPage(slug: string): Promise<UtilityPage | null> 
       utilityPage(slug: $slug) { ${UTILITY_PAGE_FIELDS} }
     }`,
     { slug },
+    [TAGS.utility],
   );
   return data.utilityPage;
 }

@@ -8,7 +8,7 @@ import RecipesLayoutTimed from '@/components/recipes/RecipesLayoutTimed';
 import RecipesLayoutVisual from '@/components/recipes/RecipesLayoutVisual';
 import RecipesLayoutMacro from '@/components/recipes/RecipesLayoutMacro';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 export const metadata: Metadata = { title: 'Recipes' };
 
 export default async function RecipesPage() {

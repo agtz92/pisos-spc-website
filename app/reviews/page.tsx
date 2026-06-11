@@ -10,7 +10,7 @@ import ReviewsLayoutLeaderboard from '@/components/reviews/ReviewsLayoutLeaderbo
 import ReviewsLayoutByType from '@/components/reviews/ReviewsLayoutByType';
 import ReviewsLayoutMacro from '@/components/reviews/ReviewsLayoutMacro';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 export const metadata: Metadata = { title: 'Reviews' };
 
 const reviewsConfig = getModuleConfig('reviews');

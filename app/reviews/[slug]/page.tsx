@@ -7,7 +7,7 @@ import ReviewDetailCompact from '@/components/reviews/detail/ReviewDetailCompact
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   try { const r = await getReviews(); return r.map((item) => ({ slug: item.slug })); }

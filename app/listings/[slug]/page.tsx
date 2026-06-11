@@ -7,7 +7,7 @@ import ListingDetailSheet from '@/components/listings/detail/ListingDetailSheet'
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   try { const l = await getListings(); return l.map((item) => ({ slug: item.slug })); }

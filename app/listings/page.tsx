@@ -9,7 +9,7 @@ import ListingsLayoutNeighborhood from '@/components/listings/ListingsLayoutNeig
 import ListingsLayoutCompare from '@/components/listings/ListingsLayoutCompare';
 import ListingsLayoutMacro from '@/components/listings/ListingsLayoutMacro';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 export const metadata: Metadata = { title: 'Listings' };
 
 const realestateConfig = getModuleConfig('realestate');

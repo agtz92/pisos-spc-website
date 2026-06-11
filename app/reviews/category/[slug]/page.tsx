@@ -3,7 +3,7 @@ import ReviewCard from '@/components/ReviewCard';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   try {

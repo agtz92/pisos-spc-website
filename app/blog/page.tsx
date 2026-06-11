@@ -8,7 +8,7 @@ import BlogLayoutStream from '@/components/blog/BlogLayoutStream';
 import BlogLayoutSpotlight from '@/components/blog/BlogLayoutSpotlight';
 import BlogLayoutMacro from '@/components/blog/BlogLayoutMacro';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 export const metadata: Metadata = { title: 'Blog' };
 
 export default async function BlogPage() {

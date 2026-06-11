@@ -4,7 +4,7 @@ import { getHomepageLandingPage } from '@/lib/graphql';
 import { fetchLandingPageModules, renderLandingPage } from '@/lib/render-landing-page';
 import { buildMetadata } from '@/lib/landing-page-seo';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {

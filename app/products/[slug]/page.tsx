@@ -7,7 +7,7 @@ import ProductDetailGallery from '@/components/products/detail/ProductDetailGall
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   try {

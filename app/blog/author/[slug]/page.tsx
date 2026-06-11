@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { getPosts, getAuthor, getAuthors, resolveMediaUrl } from '@/lib/graphql';
 import PostCard from '@/components/PostCard';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   try {

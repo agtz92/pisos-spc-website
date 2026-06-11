@@ -9,7 +9,7 @@ import ProductsLayoutLookbook from '@/components/products/ProductsLayoutLookbook
 import ProductsLayoutQuickShop from '@/components/products/ProductsLayoutQuickShop';
 import ProductsLayoutMacro from '@/components/products/ProductsLayoutMacro';
 
-export const revalidate = 60;
+export const revalidate = 86400;
 export const metadata: Metadata = { title: 'Products' };
 
 const productsConfig = getModuleConfig('products');
