@@ -11,6 +11,13 @@ import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
 import { t, FeatureIcon, StarRating, type ModuleData, type Post, type Review } from './sections';
+import {
+  StickySectionNav, ProcessTimeline, IndustriesGrid, TeamGrid,
+  PressMentions, ComparisonTable, ReviewsAggregate, NewsletterSignup,
+  ContactFormInline, ProductsGrid,
+} from './blocks';
+import LayoutHero from './LayoutHero';
+import LayoutCTA from './LayoutCTA';
 
 export default function LandingPageLayoutServices({ page, modules }: { page: LandingPage; modules: ModuleData }) {
   const heroImage = resolveMediaUrl(page.heroImage);
@@ -19,40 +26,15 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
 
   return (
     <main>
-      {/* ── Hero: split layout — text left (60%), image right (40%) ───── */}
-      {page.heroEnabled && page.heroHeadline && (
-        <section className="py-24" style={{ background: t.mutedPanel }}>
-          <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
-            <div className="lg:col-span-3">
-              {page.heroBadge && (
-                <span data-lp-badge className="inline-block mb-5 text-xs font-semibold uppercase tracking-widest" style={{ color: t.accent }}>
-                  {page.heroBadge}
-                </span>
-              )}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] tracking-tight" style={{ color: t.ink }}>
-                {page.heroHeadline}
-              </h1>
-              {page.heroSubheadline && <p className="mt-5 text-lg sm:text-xl" style={{ color: t.mutedText }}>{page.heroSubheadline}</p>}
-              {page.heroBody && <p className="mt-4 text-base leading-relaxed" style={{ color: t.mutedText, opacity: 0.8 }}>{page.heroBody}</p>}
-              {(page.heroPrimaryCtaText || page.heroSecondaryCtaText) && (
-                <div className="mt-10 flex flex-wrap gap-4">
-                  {page.heroPrimaryCtaText && <Link data-lp-primary-cta href={page.heroPrimaryCtaUrl || '#'} className="px-8 py-3.5 font-semibold rounded-xl shadow-lg transition-transform hover:scale-105" style={{ background: t.accent, color: t.panel }}>{page.heroPrimaryCtaText}</Link>}
-                  {page.heroSecondaryCtaText && <Link data-lp-secondary-cta href={page.heroSecondaryCtaUrl || '#'} className="px-8 py-3.5 font-semibold rounded-xl transition-colors" style={{ border: `2px solid ${t.panelBorder}`, color: t.ink }}>{page.heroSecondaryCtaText}</Link>}
-                </div>
-              )}
-            </div>
-            {heroImage && (
-              <div className="lg:col-span-2 relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
-                <Image src={heroImage} alt={page.heroHeadline} fill className="object-cover" priority />
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      {/* ── Phase 6 — Sticky section nav (only renders when enabled) ───── */}
+      <StickySectionNav page={page} />
+
+      {/* ── Hero — shared LayoutHero at "medium" scale respects heroStyle. */}
+      <LayoutHero page={page} scale="medium" />
 
       {/* ── Features as service offerings: alternating rows ────────────── */}
       {page.featuresEnabled && page.features.length > 0 && (
-        <section className="py-20" style={{ background: t.panel }}>
+        <section id="services" className="py-20" style={{ background: t.panel }}>
           <div className="max-w-6xl mx-auto px-4">
             {(page.featuresHeading || page.featuresSubheading) && (
               <div className="text-center mb-16">
@@ -66,7 +48,7 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
                 return (
                   <div key={f.id} className={`flex flex-col lg:flex-row items-center gap-10 ${isReversed ? 'lg:flex-row-reverse' : ''}`}>
                     <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: t.mutedPanel, color: t.accent }}>
-                      <FeatureIcon icon={f.icon} size={36} />
+                      <FeatureIcon icon={f.icon} image={f.image} alt={f.title} size={36} />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold" style={{ color: t.ink }}>{f.title}</h3>
@@ -81,13 +63,20 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
         </section>
       )}
 
+      {/* ── Phase 6 — Process timeline + Industries (between Features and Blog) ── */}
+      <section id="process"><ProcessTimeline page={page} /></section>
+      <IndustriesGrid page={page} />
+
+      {/* ── Products section (generic — Storefront/Digital use their own) ── */}
+      <ProductsGrid page={page} modules={modules} />
+
       {/* ── MODULE: Blog posts — Insights & Resources ─────────────────── */}
       {topPosts.length > 0 && (
-        <section className="py-20" style={{ background: t.mutedPanel }}>
+        <section id="cases" className="py-20" style={{ background: t.mutedPanel }}>
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center justify-between mb-10">
-              <h2 className="text-3xl font-bold" style={{ color: t.ink }}>Insights &amp; Resources</h2>
-              <Link href="/blog" className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>View all &rarr;</Link>
+              <h2 className="text-3xl font-bold" style={{ color: t.ink }}>{page.blogSectionHeading || 'Insights & Resources'}</h2>
+              <Link href={page.blogSectionLinkUrl || '/blog'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'View all →'}</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {topPosts.map((post: Post) => {
@@ -106,6 +95,15 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
           </div>
         </section>
       )}
+
+      {/* ── Phase 6 — Team grid (between Blog and Testimonials) ────────── */}
+      <TeamGrid page={page} />
+
+      {/* ── v2 — Press mentions strip ───────────────────────────────────── */}
+      <PressMentions page={page} />
+
+      {/* ── v2 — Reviews aggregate widget ───────────────────────────────── */}
+      <ReviewsAggregate page={page} modules={modules} />
 
       {/* ── Testimonials: large quote cards, 2-column grid ────────────── */}
       {page.testimonialsEnabled && page.testimonials.length > 0 && (
@@ -135,7 +133,7 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
       {topReviews.length > 0 && (
         <section className="py-16" style={{ background: t.mutedPanel, borderTop: `1px solid ${t.panelBorder}` }}>
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-2xl font-bold mb-8 text-center" style={{ color: t.ink }}>What Our Clients Say</h2>
+            <h2 className="text-2xl font-bold mb-8 text-center" style={{ color: t.ink }}>{page.reviewsSectionHeading || 'What Our Clients Say'}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {topReviews.map((r: Review) => (
                 <Link data-lp-review-card key={r.id} href={`/reviews/${r.slug}`} className="rounded-xl p-5 transition-shadow hover:shadow-md" style={{ background: t.panel, border: `1px solid ${t.panelBorder}` }}>
@@ -149,9 +147,12 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
         </section>
       )}
 
+      {/* ── v2 — Comparison table (before pricing) ──────────────────────── */}
+      <ComparisonTable page={page} />
+
       {/* ── Pricing ───────────────────────────────────────────────────── */}
       {page.pricingEnabled && page.pricingPlans.length > 0 && (
-        <section className="py-20" style={{ background: t.panel }}>
+        <section id="pricing" className="py-20" style={{ background: t.panel }}>
           <div className="max-w-6xl mx-auto px-4">
             {(page.pricingHeading || page.pricingSubheading) && (
               <div className="text-center mb-14">
@@ -204,21 +205,12 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
         </section>
       )}
 
+      {/* ── v2 — Contact form + Newsletter (before CTA) ─────────────────── */}
+      <ContactFormInline page={page} />
+      {page.newsletter?.enabled && <NewsletterSignup page={page} block={page.newsletter} />}
+
       {/* ── CTA ────────────────────────────────────────────────────────── */}
-      {page.ctaEnabled && page.ctaHeading && (
-        <section className="py-20" style={{ background: page.ctaStyle === 'dark' ? t.ink : page.ctaStyle === 'brand' ? t.accent : t.panel, color: page.ctaStyle === 'default' || !page.ctaStyle ? t.ink : t.panel }}>
-          <div className="max-w-4xl mx-auto px-4 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold">{page.ctaHeading}</h2>
-            {page.ctaSubheading && <p className="mt-4 text-lg" style={{ opacity: page.ctaStyle === 'default' || !page.ctaStyle ? 1 : 0.85, color: page.ctaStyle === 'default' || !page.ctaStyle ? t.mutedText : 'inherit' }}>{page.ctaSubheading}</p>}
-            {(page.ctaPrimaryText || page.ctaSecondaryText) && (
-              <div className="mt-8 flex flex-wrap justify-center gap-4">
-                {page.ctaPrimaryText && <Link data-lp-primary-cta href={page.ctaPrimaryUrl || '#'} className="px-8 py-3 rounded-xl font-semibold shadow transition-colors" style={{ background: page.ctaStyle === 'default' || !page.ctaStyle ? t.accent : t.panel, color: page.ctaStyle === 'default' || !page.ctaStyle ? t.panel : t.ink }}>{page.ctaPrimaryText}</Link>}
-                {page.ctaSecondaryText && <Link data-lp-secondary-cta href={page.ctaSecondaryUrl || '#'} className="px-8 py-3 rounded-xl font-semibold transition-colors" style={{ border: page.ctaStyle === 'default' || !page.ctaStyle ? `2px solid ${t.panelBorder}` : '2px solid rgba(255,255,255,0.4)', color: page.ctaStyle === 'default' || !page.ctaStyle ? t.ink : 'inherit' }}>{page.ctaSecondaryText}</Link>}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      <LayoutCTA page={page} scale="regular" />
     </main>
   );
 }

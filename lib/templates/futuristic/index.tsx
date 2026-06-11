@@ -10,6 +10,7 @@ import { FuturisticGlobalStyles } from './FuturisticGlobalStyles';
 
 interface TemplateLayoutProps {
   siteName: string;
+  logo?: string | null;
   enabledModules: string[];
   savedConfig?: Record<string, unknown>;
   children: React.ReactNode;
@@ -55,7 +56,7 @@ function resolveFuturisticColors(
   };
 }
 
-export function FuturisticLayout({ siteName, enabledModules, savedConfig, children }: TemplateLayoutProps) {
+export function FuturisticLayout({ siteName, logo, enabledModules, savedConfig, children }: TemplateLayoutProps) {
   const savedColors = (savedConfig?.colors ?? {}) as Partial<FuturisticColors>;
   const colors = resolveFuturisticColors(futuristicConfig.colors, savedColors);
   const copy = { ...futuristicConfig.copy, ...(savedConfig?.copy as Partial<typeof futuristicConfig.copy> ?? {}) };
@@ -90,7 +91,7 @@ export function FuturisticLayout({ siteName, enabledModules, savedConfig, childr
       <FuturisticBackgroundAdornment adornment={adornment} colors={colors} />
 
       <div className="relative z-10 flex min-h-full flex-col">
-        <FuturisticHeader siteName={siteName} colors={colors} navItems={navItems} />
+        <FuturisticHeader siteName={siteName} logo={logo} colors={colors} navItems={navItems} />
 
         <FuturisticContentFrame
           colors={colors}
@@ -102,7 +103,7 @@ export function FuturisticLayout({ siteName, enabledModules, savedConfig, childr
 
         <FuturisticGlobalStyles colors={colors} />
 
-        <FuturisticFooter siteName={siteName} colors={colors} copy={copy} navItems={navItems} />
+        <FuturisticFooter siteName={siteName} logo={logo} colors={colors} copy={copy} navItems={navItems} />
       </div>
     </div>
   );

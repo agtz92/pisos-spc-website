@@ -13,6 +13,11 @@ import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
 import { t, FeatureIcon, StarRating, type ModuleData, type Post, type Review } from './sections';
+import {
+  ReviewsAggregate, PressMentions, NewsletterSignup, TeamGrid,
+  ProductsGrid, pickBlock, CustomBlock,
+} from './blocks';
+import LayoutHero from './LayoutHero';
 
 const MODULE_LABELS: Record<string, string> = {
   blog:       'Blog',
@@ -42,100 +47,40 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
 
   return (
     <main>
+      {/* ── HERO — shared LayoutHero at monumental scale, with opt-in pill nav. */}
+      <LayoutHero page={page} scale="monumental">
+        {page.macroPillNavEnabled && pillNav.length > 0 && (
+          <nav
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1"
+            style={{
+              background: 'rgba(20,20,20,0.82)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '999px',
+              padding: '6px 8px',
+            }}
+          >
+            {pillNav.map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="px-5 py-2 text-sm font-semibold text-white/80 hover:text-white rounded-full transition-colors hover:bg-white/10"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        )}
+      </LayoutHero>
 
-      {/* ── HERO: full-viewport, bg image, massive centered headline ─────── */}
-      {page.heroEnabled && page.heroHeadline && (
-        <section
-          className="relative flex flex-col items-center justify-center overflow-hidden"
-          style={{ minHeight: '100svh' }}
-        >
-          {/* Background image */}
-          {heroImage ? (
-            <>
-              <Image
-                src={heroImage}
-                alt={page.heroHeadline}
-                fill
-                className="object-cover"
-                priority
-              />
-              {/* Gradient overlay — darkens bottom so pill nav is readable */}
-              <div
-                className="absolute inset-0"
-                style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.42) 60%, rgba(0,0,0,0.68) 100%)' }}
-              />
-            </>
-          ) : (
-            <div className="absolute inset-0" style={{ background: t.ink }} />
-          )}
-
-          {/* Centered text block */}
-          <div className="relative z-10 text-center px-6 sm:px-12 max-w-6xl mx-auto">
-            {page.heroBadge && (
-              <p className="mb-6 text-sm font-semibold uppercase tracking-[0.25em] text-white/80">
-                {page.heroBadge}
-              </p>
-            )}
-            <h1
-              className="font-black leading-[0.95] tracking-tight text-white"
-              style={{ fontSize: 'clamp(3rem, 8vw, 7.5rem)' }}
-            >
-              {page.heroHeadline}
-            </h1>
-            {page.heroSubheadline && (
-              <p className="mt-6 text-lg sm:text-2xl font-light text-white/80 max-w-2xl mx-auto leading-relaxed">
-                {page.heroSubheadline}
-              </p>
-            )}
-            {(page.heroPrimaryCtaText || page.heroSecondaryCtaText) && (
-              <div className="mt-10 flex flex-wrap justify-center gap-4">
-                {page.heroPrimaryCtaText && (
-                  <Link
-                    data-lp-primary-cta
-                    href={page.heroPrimaryCtaUrl || '#'}
-                    className="px-10 py-4 font-bold uppercase tracking-widest text-sm transition-opacity hover:opacity-90"
-                    style={{ background: '#fff', color: '#111' }}
-                  >
-                    {page.heroPrimaryCtaText}
-                  </Link>
-                )}
-                {page.heroSecondaryCtaText && (
-                  <Link
-                    data-lp-secondary-cta
-                    href={page.heroSecondaryCtaUrl || '#'}
-                    className="px-10 py-4 font-bold uppercase tracking-widest text-sm text-white border-2 border-white/50 transition-colors hover:border-white"
-                  >
-                    {page.heroSecondaryCtaText}
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Floating pill nav */}
-          {pillNav.length > 0 && (
-            <nav
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1"
-              style={{
-                background: 'rgba(20,20,20,0.82)',
-                backdropFilter: 'blur(12px)',
-                borderRadius: '999px',
-                padding: '6px 8px',
-              }}
-            >
-              {pillNav.map(({ label, href }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="px-5 py-2 text-sm font-semibold text-white/80 hover:text-white rounded-full transition-colors hover:bg-white/10"
-                >
-                  {label}
-                </Link>
-              ))}
-            </nav>
-          )}
-        </section>
-      )}
+      {/* ── v2 — Marquee + Manifesto (right after hero) ──────────────────── */}
+      {(() => {
+        const block = pickBlock(page.customBlocks, 'marquee');
+        return block ? <CustomBlock block={block} /> : null;
+      })()}
+      {(() => {
+        const block = pickBlock(page.customBlocks, 'manifesto');
+        return block ? <CustomBlock block={block} /> : null;
+      })()}
 
       {/* ── FEATURES: numbered, stacked, giant numerals ──────────────────── */}
       {page.featuresEnabled && page.features.length > 0 && (
@@ -159,27 +104,45 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
               </div>
             )}
             <div className="flex flex-col">
-              {page.features.map((f: LandingFeature, idx: number) => (
-                <div
-                  key={f.id}
-                  className="flex flex-col sm:flex-row items-start gap-8 py-12"
-                  style={{ borderTop: `1px solid ${t.panelBorder}` }}
-                >
-                  {/* Giant number */}
-                  <span
-                    className="font-black leading-none select-none flex-shrink-0 w-20 text-right"
-                    style={{ fontSize: 'clamp(4rem, 7vw, 6rem)', color: t.panelBorder }}
+              {page.features.map((f: LandingFeature, idx: number) => {
+                // When the editor uploaded an image OR picked an icon, we
+                // hide the decorative big number and grow the visual into
+                // the slot the number used to occupy. When neither is
+                // present, keep the giant outline number as the visual.
+                const hasVisual = !!(f.icon || f.image);
+                return (
+                  <div
+                    key={f.id}
+                    className="flex flex-col sm:flex-row items-start gap-8 py-12"
+                    style={{ borderTop: `1px solid ${t.panelBorder}` }}
                   >
-                    {String(idx + 1).padStart(2, '0')}
-                  </span>
-                  {/* Icon + content */}
-                  <div className="flex gap-6 items-start flex-1">
-                    <div
-                      className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: t.mutedPanel, color: t.accent }}
-                    >
-                      <FeatureIcon icon={f.icon} size={28} />
-                    </div>
+                    {/* Left slot — visual OR giant number, never both. */}
+                    {hasVisual ? (
+                      <div
+                        className="flex items-center justify-center flex-shrink-0 rounded-2xl"
+                        style={{
+                          width: 'clamp(72px, 9vw, 112px)',
+                          height: 'clamp(72px, 9vw, 112px)',
+                          background: t.mutedPanel,
+                          color: t.accent,
+                        }}
+                      >
+                        <FeatureIcon
+                          icon={f.icon}
+                          image={f.image}
+                          alt={f.title}
+                          size={56}
+                        />
+                      </div>
+                    ) : (
+                      <span
+                        className="font-black leading-none select-none flex-shrink-0 w-20 text-right"
+                        style={{ fontSize: 'clamp(4rem, 7vw, 6rem)', color: t.panelBorder }}
+                      >
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                    )}
+                    {/* Content */}
                     <div className="flex-1 pt-1">
                       <h3
                         className="font-bold text-2xl sm:text-3xl"
@@ -201,12 +164,15 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
                       )}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
       )}
+
+      {/* ── Products grid (opt-in) ──────────────────────────────────────── */}
+      <ProductsGrid page={page} modules={modules} />
 
       {/* ── MODULE: Blog posts — two-column, large cards ─────────────────── */}
       {topPosts.length > 0 && (
@@ -217,14 +183,14 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
                 className="font-black leading-[0.9] tracking-tight"
                 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', color: t.ink }}
               >
-                Insights &amp;<br />Resources
+                {page.blogSectionHeading || (<>Insights &amp;<br />Resources</>)}
               </h2>
               <Link
-                href="/blog"
+                href={page.blogSectionLinkUrl || '/blog'}
                 className="font-semibold text-sm uppercase tracking-widest hover:underline flex-shrink-0"
                 style={{ color: t.accent }}
               >
-                All articles &rarr;
+                {page.blogSectionLinkText || 'All articles →'}
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -333,6 +299,10 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
         </section>
       )}
 
+      {/* ── v2 — Reviews aggregate widget + Team ─────────────────────────── */}
+      <ReviewsAggregate page={page} modules={modules} />
+      <TeamGrid page={page} />
+
       {/* ── MODULE: Reviews strip ─────────────────────────────────────────── */}
       {topReviews.length > 0 && (
         <section className="py-20" style={{ background: t.mutedPanel, borderTop: `1px solid ${t.panelBorder}` }}>
@@ -341,7 +311,7 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
               className="font-black mb-12"
               style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', color: t.ink }}
             >
-              What Our Clients Say
+              {page.reviewsSectionHeading || 'What Our Clients Say'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {topReviews.map((r: Review) => (
@@ -501,6 +471,13 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
         </section>
       )}
 
+      {/* ── v2 — Press mentions + Press kit (before Logo bar) ────────────── */}
+      <PressMentions page={page} />
+      {(() => {
+        const block = pickBlock(page.customBlocks, 'press_kit');
+        return block ? <CustomBlock block={block} /> : null;
+      })()}
+
       {/* ── Logo Bar ─────────────────────────────────────────────────────── */}
       {page.logobarEnabled && page.logos.length > 0 && (
         <section className="py-16" style={{ background: t.panel, borderTop: `1px solid ${t.panelBorder}` }}>
@@ -534,15 +511,22 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
         </section>
       )}
 
-      {/* ── CTA: full-bleed, massive text ────────────────────────────────── */}
+      {/* ── v2 — Newsletter monumental (between logos and CTA) ───────────── */}
+      {page.newsletter?.enabled && <NewsletterSignup page={page} block={page.newsletter} />}
+
+      {/* ── CTA: full-bleed, massive text ──────────────────────────────────
+          ``data-lp-on-dark`` is emitted when the background of this CTA
+          is the template's ink or accent — both are dark colors that
+          require light text. The active template's GlobalStyles handle
+          the actual color tokens. */}
       {page.ctaEnabled && page.ctaHeading && (
         <section
+          data-lp-on-dark={page.ctaStyle === 'dark' || page.ctaStyle === 'brand' ? '' : undefined}
           className="py-32 px-6"
           style={{
             background: page.ctaStyle === 'dark'  ? t.ink
                       : page.ctaStyle === 'brand' ? t.accent
                       : t.panel,
-            color: (page.ctaStyle === 'default' || !page.ctaStyle) ? t.ink : '#fff',
           }}
         >
           <div className="max-w-5xl mx-auto text-center">
@@ -554,10 +538,8 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
             </h2>
             {page.ctaSubheading && (
               <p
+                data-lp-subhead
                 className="mt-6 text-xl sm:text-2xl max-w-3xl mx-auto leading-relaxed"
-                style={{
-                  color: (page.ctaStyle === 'default' || !page.ctaStyle) ? t.mutedText : 'rgba(255,255,255,0.75)',
-                }}
               >
                 {page.ctaSubheading}
               </p>
@@ -569,10 +551,7 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
                     data-lp-primary-cta
                     href={page.ctaPrimaryUrl || '#'}
                     className="px-10 py-4 font-bold uppercase tracking-widest text-sm transition-opacity hover:opacity-90"
-                    style={{
-                      background: (page.ctaStyle === 'default' || !page.ctaStyle) ? t.accent : '#fff',
-                      color:      (page.ctaStyle === 'default' || !page.ctaStyle) ? t.panel  : t.ink,
-                    }}
+                    style={{ background: t.accent, color: t.panel }}
                   >
                     {page.ctaPrimaryText}
                   </Link>
@@ -582,10 +561,7 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
                     data-lp-secondary-cta
                     href={page.ctaSecondaryUrl || '#'}
                     className="px-10 py-4 font-bold uppercase tracking-widest text-sm border-2 transition-colors"
-                    style={{
-                      borderColor: (page.ctaStyle === 'default' || !page.ctaStyle) ? t.panelBorder : 'rgba(255,255,255,0.45)',
-                      color:       (page.ctaStyle === 'default' || !page.ctaStyle) ? t.ink         : '#fff',
-                    }}
+                    style={{ borderColor: t.panelBorder, color: t.ink }}
                   >
                     {page.ctaSecondaryText}
                   </Link>

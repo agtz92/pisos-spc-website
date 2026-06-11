@@ -212,6 +212,60 @@ export function ExecutiveGlobalStyles({ colors }: { colors: ExecutiveTemplateCol
         .executive-shell [class*="aspect-"] img { transition: none; }
         .executive-logo-link:hover .executive-logo-mark { animation: none; }
       }
+
+      /* ──────────────────────────────────────────────────────────────────
+         Landing Page · data-lp-on-dark contract.
+
+         Layouts mark a section that sits on a dark background with
+         data-lp-on-dark. The template is responsible for swapping
+         headings, badges, and CTA chrome to its own LIGHT palette.
+         The layout never picks colors itself — that keeps each tenant
+         template fully in control of the resulting look.
+
+         For Executive, "light" maps to panelBackground (the template's
+         near-white surface) so the result is template-coherent instead
+         of raw #fff.
+      */
+      .executive-shell [data-lp-on-dark] h1,
+      .executive-shell [data-lp-on-dark] h2,
+      .executive-shell [data-lp-on-dark] h3,
+      .executive-shell [data-lp-on-dark] h4,
+      .executive-shell [data-lp-on-dark] h5,
+      .executive-shell [data-lp-on-dark] h6 {
+        color: ${colors.panelBackground} !important;
+      }
+
+      .executive-shell [data-lp-on-dark] [data-lp-badge],
+      .executive-shell [data-lp-on-dark] [data-lp-subhead] {
+        color: color-mix(in srgb, ${colors.panelBackground} 85%, transparent) !important;
+      }
+      /* Body paragraphs sit one step more muted than subhead so the
+         visual hierarchy reads correctly on dark backdrops. */
+      .executive-shell [data-lp-on-dark] [data-lp-body] {
+        color: color-mix(in srgb, ${colors.panelBackground} 75%, transparent) !important;
+      }
+
+      /* Secondary CTA on dark — swap the panel/accent override that
+         applies on light backgrounds (defined above) for a light-on-dark
+         palette. Border + text use the template's panel color so the
+         button stays template-coherent, not raw white. */
+      .executive-shell [data-lp-on-dark] [data-lp-secondary-cta] {
+        color: ${colors.panelBackground} !important;
+        border-color: color-mix(in srgb, ${colors.panelBackground} 55%, transparent) !important;
+        background: transparent !important;
+      }
+      .executive-shell [data-lp-on-dark] [data-lp-secondary-cta]:hover {
+        background: color-mix(in srgb, ${colors.panelBackground} 12%, transparent) !important;
+        color: ${colors.panelBackground} !important;
+        border-color: ${colors.panelBackground} !important;
+      }
+
+      /* Primary CTA on dark — flip to panelBackground bg + ink text so
+         the button still passes contrast against the dark backdrop. */
+      .executive-shell [data-lp-on-dark] [data-lp-primary-cta] {
+        background: ${colors.panelBackground} !important;
+        color: ${colors.ink} !important;
+      }
     `}</style>
   );
 }

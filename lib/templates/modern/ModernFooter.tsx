@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import type { ModernTemplateColors } from '../config';
 import { ModernPolygonMark } from './ModernPolygonMark';
+import { TenantLogo } from '../TenantLogo';
 
 interface ModernFooterProps {
   siteName: string;
+  logo?: string | null;
   colors: ModernTemplateColors;
   copy: {
     footerDescription: string;
@@ -17,7 +19,7 @@ interface ModernFooterProps {
   navItems: { label: string; href: string }[];
 }
 
-export function ModernFooter({ siteName, colors, copy, navItems }: ModernFooterProps) {
+export function ModernFooter({ siteName, logo, colors, copy, navItems }: ModernFooterProps) {
   const ruleColor = `color-mix(in srgb, ${colors.ink} 12%, transparent)`;
   const eyebrowColor = `color-mix(in srgb, ${colors.ink} 40%, transparent)`;
   const navHoverBorder = `color-mix(in srgb, ${colors.accent} 18%, transparent)`;
@@ -30,21 +32,25 @@ export function ModernFooter({ siteName, colors, copy, navItems }: ModernFooterP
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
           <div className="max-w-xl">
-            <div className="flex items-center gap-3">
-              <ModernPolygonMark colors={colors} />
-              <span
-                style={{
-                  fontFamily: '"Arial Black", Impact, "Segoe UI", sans-serif',
-                  fontSize: '1.8rem',
-                  letterSpacing: '-0.06em',
-                  background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentStrong} 100%)`,
-                  WebkitBackgroundClip: 'text',
-                  color: 'transparent',
-                }}
-              >
-                {siteName}
-              </span>
-            </div>
+            {logo ? (
+              <TenantLogo src={logo} alt={siteName} variant="footer" />
+            ) : (
+              <div className="flex items-center gap-3">
+                <ModernPolygonMark colors={colors} />
+                <span
+                  style={{
+                    fontFamily: '"Arial Black", Impact, "Segoe UI", sans-serif',
+                    fontSize: '1.8rem',
+                    letterSpacing: '-0.06em',
+                    background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentStrong} 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                  }}
+                >
+                  {siteName}
+                </span>
+              </div>
+            )}
             <p className="mt-4 text-sm leading-7" style={{ color: colors.mutedText }}>
               {copy.footerDescription}
             </p>

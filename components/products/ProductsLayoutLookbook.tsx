@@ -34,6 +34,8 @@ import Link from 'next/link';
 import type { Product, Category } from '@/lib/graphql';
 import { resolveMediaUrl } from '@/lib/graphql';
 import { CategoryFilterBar } from '@/components/CategoryFilterBar';
+import { getStockBadge, type StockConfig } from '@/lib/product-stock';
+import { stripMarkdown, truncate } from '@/lib/strip-markdown';
 
 function formatPrice(price: string | null): string | null {
   if (!price) return null;
@@ -42,12 +44,25 @@ function formatPrice(price: string | null): string | null {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-function LookbookRow({ product, index }: { product: Product; index: number }) {
+function LookbookRow({
+  product,
+  index,
+  stockConfig,
+}: {
+  product: Product;
+  index: number;
+  stockConfig: StockConfig | null | undefined;
+}) {
   const imageUrl = resolveMediaUrl(product.coverImage);
   const price = formatPrice(product.price);
   const compareAt = formatPrice(product.compareAtPrice);
   const isEven = index % 2 === 0;
-  const inStock = product.stock == null || product.stock > 0;
+  const stock = getStockBadge(product.stock, stockConfig);
+  // Short description (markdown stripped) used in lookbook text block when
+  // present; falls back to long description for backward compat.
+  const previewText = product.shortDescription
+    ? truncate(stripMarkdown(product.shortDescription), 200)
+    : null;
 
   const textBlock = (
     <div data-lookbook-text={isEven ? 'right' : 'left'} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '3rem 3.5rem', gap: '1rem' }}>
@@ -64,15 +79,19 @@ function LookbookRow({ product, index }: { product: Product; index: number }) {
       {product.brand && (
         <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--template-muted-text, #6b7280)' }}>{product.brand}</p>
       )}
-      {product.description && (
+      {(previewText || product.description) && (
         <p className="line-clamp-3" style={{ fontSize: '0.95rem', lineHeight: 1.7, color: 'var(--template-muted-text, #6b7280)' }}>
-          {product.description}
+          {previewText ?? product.description}
         </p>
       )}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
         {price && <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--template-ink, #161218)' }}>{price}</span>}
         {compareAt && <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--template-muted-text, #9ca3af)', textDecoration: 'line-through' }}>{compareAt}</span>}
-        {!inStock && <span data-product-badge style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: 999, background: 'var(--template-muted-panel, #f3f4f6)', color: 'var(--template-muted-text, #9ca3af)' }}>Out of stock</span>}
+        {stock && !stock.inStock && (
+          <span data-product-badge style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: 999, background: 'var(--template-muted-panel, #f3f4f6)', color: stock.color, border: `1px solid ${stock.color}` }}>
+            {stock.label}
+          </span>
+        )}
       </div>
       <Link href={`/products/${product.slug}`} data-product-cta style={{ display: 'block', textAlign: 'center', padding: '0.85rem 1.5rem', borderRadius: 12, fontWeight: 800, fontSize: '0.88rem', letterSpacing: '0.02em', background: 'linear-gradient(135deg, var(--template-accent, #ec0f7f) 0%, var(--template-accent-strong, #c105aa) 100%)', color: '#fff', textDecoration: 'none' }}>
         Shop Now
@@ -102,14 +121,17 @@ function LookbookRow({ product, index }: { product: Product; index: number }) {
 interface Props {
   products: Product[];
   categories: Category[];
+  /** Optional — drives the stock pill. Pass from the list page after a
+   *  single getTenant() fetch. */
+  stockConfig?: StockConfig | null;
 }
 
-export default function ProductsLayoutLookbook({ products, categories }: Props) {
+export default function ProductsLayoutLookbook({ products, categories, stockConfig }: Props) {
   return (
     <div>
       <CategoryFilterBar categories={categories} basePath="/products/category/" />
       <div style={{ maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem 0.5rem 1rem 0' }}>
-        {products.map((p, i) => <LookbookRow key={p.slug} product={p} index={i} />)}
+        {products.map((p, i) => <LookbookRow key={p.slug} product={p} index={i} stockConfig={stockConfig} />)}
       </div>
     </div>
   );

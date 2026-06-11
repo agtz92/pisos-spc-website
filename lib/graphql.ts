@@ -92,10 +92,12 @@ export async function getPosts(options?: {
   categorySlug?: string;
   tagSlug?: string;
   authorSlug?: string;
+  featured?: boolean;    // v2 — LP blog_source='featured'
+  limit?: number;        // v2 — LP blog_count
 }): Promise<Post[]> {
   const data = await gql<{ posts: Post[] }>(
-    `query Posts($categorySlug: String, $tagSlug: String, $authorSlug: String) {
-      posts(categorySlug: $categorySlug, tagSlug: $tagSlug, authorSlug: $authorSlug) {
+    `query Posts($categorySlug: String, $tagSlug: String, $authorSlug: String, $featured: Boolean, $limit: Int) {
+      posts(categorySlug: $categorySlug, tagSlug: $tagSlug, authorSlug: $authorSlug, featured: $featured, limit: $limit) {
         ${POST_LIST_FIELDS}
       }
     }`,
@@ -103,6 +105,8 @@ export async function getPosts(options?: {
       categorySlug: options?.categorySlug ?? null,
       tagSlug: options?.tagSlug ?? null,
       authorSlug: options?.authorSlug ?? null,
+      featured: options?.featured ?? null,
+      limit: options?.limit ?? null,
     },
   );
   return data.posts;
@@ -161,12 +165,25 @@ export async function getAuthor(slug: string): Promise<Author | null> {
 
 export interface TenantInfo {
   name: string;
+  logo: string | null;
   template: string;
   templateConfig: Record<string, unknown> | null;
   modules: string[];
+  isVerified: boolean;     // v2 · Phase 6 — Links profile verified badge
   customCodeHead: string;
   customCodeBodyStart: string;
   customCodeBodyEnd: string;
+  // WhatsApp floating button (Phase 1) ────────────────────────────────────
+  whatsappEnabled: boolean;
+  whatsappPhone: string;
+  whatsappMessage: string;
+  whatsappLottieEnabled: boolean;
+  // Product stock badge config ─────────────────────────────────────────────
+  productStockIndicatorEnabled: boolean;
+  productInStockLabel: string;
+  productInStockColor: string;
+  productOutOfStockLabel: string;
+  productOutOfStockColor: string;
 }
 
 export async function getTenant(): Promise<TenantInfo | null> {
@@ -174,12 +191,23 @@ export async function getTenant(): Promise<TenantInfo | null> {
     `query Tenant {
       tenant {
         name
+        logo
         template
         templateConfig
         modules
+        isVerified
         customCodeHead
         customCodeBodyStart
         customCodeBodyEnd
+        whatsappEnabled
+        whatsappPhone
+        whatsappMessage
+        whatsappLottieEnabled
+        productStockIndicatorEnabled
+        productInStockLabel
+        productInStockColor
+        productOutOfStockLabel
+        productOutOfStockColor
       }
     }`,
   );
@@ -256,10 +284,18 @@ export interface SpecGroup {
   rows: string[][];
 }
 
+export interface ProductImage {
+  id: string;
+  image: string | null;
+  alt: string;
+  order: number;
+}
+
 export interface Product {
   id: string;
   title: string;
   slug: string;
+  shortDescription: string;
   description: string;
   coverImage: string | null;
   price: string | null;
@@ -272,6 +308,9 @@ export interface Product {
   category: Category | null;
   /** Only populated by getProduct (detail). List queries omit this field for payload size. */
   specifications?: SpecGroup[];
+  /** Gallery images. Detail page only — list fragments omit it. Cover image
+   *  always renders first, then these in ``order``. */
+  images?: ProductImage[];
 }
 
 // ── Listing types ─────────────────────────────────────────────────────────────
@@ -342,12 +381,12 @@ const RECIPE_FIELDS = `
   instructions { description }
 `;
 
-export async function getRecipes(options?: { categorySlug?: string }): Promise<Recipe[]> {
+export async function getRecipes(options?: { categorySlug?: string; limit?: number }): Promise<Recipe[]> {
   const data = await gql<{ recipes: Recipe[] }>(
-    `query Recipes($categorySlug: String) {
-      recipes(categorySlug: $categorySlug) { ${RECIPE_LIST_FIELDS} }
+    `query Recipes($categorySlug: String, $limit: Int) {
+      recipes(categorySlug: $categorySlug, limit: $limit) { ${RECIPE_LIST_FIELDS} }
     }`,
-    { categorySlug: options?.categorySlug ?? null },
+    { categorySlug: options?.categorySlug ?? null, limit: options?.limit ?? null },
   );
   return data.recipes;
 }
@@ -365,7 +404,7 @@ export async function getRecipe(slug: string): Promise<Recipe | null> {
 // ── Product queries ───────────────────────────────────────────────────────────
 
 const PRODUCT_LIST_FIELDS = `
-  id title slug description coverImage
+  id title slug shortDescription description coverImage
   price compareAtPrice brand sku stock
   publishedAt createdAt
   category { id name slug }
@@ -374,14 +413,23 @@ const PRODUCT_LIST_FIELDS = `
 const PRODUCT_DETAIL_FIELDS = `
   ${PRODUCT_LIST_FIELDS}
   specifications { name headers rows }
+  images { id image alt order }
 `;
 
-export async function getProducts(options?: { categorySlug?: string }): Promise<Product[]> {
+export async function getProducts(options?: {
+  categorySlug?: string;
+  featured?: boolean;   // v2 — LP products_source='featured'
+  limit?: number;       // v2 — LP products_count
+}): Promise<Product[]> {
   const data = await gql<{ products: Product[] }>(
-    `query Products($categorySlug: String) {
-      products(categorySlug: $categorySlug) { ${PRODUCT_LIST_FIELDS} }
+    `query Products($categorySlug: String, $featured: Boolean, $limit: Int) {
+      products(categorySlug: $categorySlug, featured: $featured, limit: $limit) { ${PRODUCT_LIST_FIELDS} }
     }`,
-    { categorySlug: options?.categorySlug ?? null },
+    {
+      categorySlug: options?.categorySlug ?? null,
+      featured: options?.featured ?? null,
+      limit: options?.limit ?? null,
+    },
   );
   return data.products;
 }
@@ -417,12 +465,20 @@ const LISTING_FIELDS = `
   category { id name slug }
 `;
 
-export async function getListings(options?: { listingType?: string; propertyType?: string }): Promise<Listing[]> {
+export async function getListings(options?: {
+  listingType?: string;
+  propertyType?: string;
+  limit?: number;    // v2 — LP listings_count
+}): Promise<Listing[]> {
   const data = await gql<{ listings: Listing[] }>(
-    `query Listings($listingType: String, $propertyType: String) {
-      listings(listingType: $listingType, propertyType: $propertyType) { ${LISTING_LIST_FIELDS} }
+    `query Listings($listingType: String, $propertyType: String, $limit: Int) {
+      listings(listingType: $listingType, propertyType: $propertyType, limit: $limit) { ${LISTING_LIST_FIELDS} }
     }`,
-    { listingType: options?.listingType ?? null, propertyType: options?.propertyType ?? null },
+    {
+      listingType: options?.listingType ?? null,
+      propertyType: options?.propertyType ?? null,
+      limit: options?.limit ?? null,
+    },
   );
   return data.listings;
 }
@@ -454,12 +510,22 @@ const REVIEW_FIELDS = `
   author { id name slug bio avatar }
 `;
 
-export async function getReviews(options?: { reviewType?: string; categorySlug?: string }): Promise<Review[]> {
+export async function getReviews(options?: {
+  reviewType?: string;
+  categorySlug?: string;
+  orderByRating?: boolean;  // v2 — LP reviews_source='highest'
+  limit?: number;           // v2 — LP reviews_count
+}): Promise<Review[]> {
   const data = await gql<{ reviews: Review[] }>(
-    `query Reviews($reviewType: String, $categorySlug: String) {
-      reviews(reviewType: $reviewType, categorySlug: $categorySlug) { ${REVIEW_LIST_FIELDS} }
+    `query Reviews($reviewType: String, $categorySlug: String, $orderByRating: Boolean, $limit: Int) {
+      reviews(reviewType: $reviewType, categorySlug: $categorySlug, orderByRating: $orderByRating, limit: $limit) { ${REVIEW_LIST_FIELDS} }
     }`,
-    { reviewType: options?.reviewType ?? null, categorySlug: options?.categorySlug ?? null },
+    {
+      reviewType: options?.reviewType ?? null,
+      categorySlug: options?.categorySlug ?? null,
+      orderByRating: options?.orderByRating ?? null,
+      limit: options?.limit ?? null,
+    },
   );
   return data.reviews;
 }
@@ -480,9 +546,133 @@ export interface LandingFeature {
   id: string;
   title: string;
   icon: string;
+  image: string | null;   // optional uploaded image — overrides icon if set
   description: string;
   linkText: string;
   linkUrl: string;
+  span: string;     // v2 — 'regular' | 'wide' | 'tall' (bento layout)
+  order: number;
+}
+
+export interface LandingPressMention {
+  id: string;
+  mediaName: string;
+  quote: string;
+  logo: string | null;
+  url: string;
+  order: number;
+}
+
+export interface LandingComparisonRow {
+  id: string;
+  featureName: string;
+  values: Record<string, unknown>;  // { "<pricing_plan_id>": "✓" | "5GB" | ... }
+  order: number;
+}
+
+export interface LandingNewsletterBlock {
+  id: string;
+  heading: string;
+  subheading: string;
+  placeholder: string;
+  buttonText: string;
+  successMessage: string;
+  provider: string;
+  providerListId: string;
+  enabled: boolean;
+}
+
+// ── Phase 5 — Specialty sub-models ──────────────────────────────────────────
+
+export interface LandingProcessStep {
+  id: string;
+  stepNumber: number;
+  title: string;
+  description: string;
+  duration: string;
+  icon: string;
+  image: string | null;
+  order: number;
+}
+
+export interface LandingOutcome {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  image: string | null;
+  order: number;
+}
+
+export interface LandingBonus {
+  id: string;
+  title: string;
+  description: string;
+  valueUsd: number | null;
+  icon: string;
+  image: string | null;
+  order: number;
+}
+
+export interface LandingAward {
+  id: string;
+  title: string;
+  organization: string;
+  year: number | null;
+  image: string | null;
+  url: string;
+  order: number;
+}
+
+export interface LandingSocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  order: number;
+}
+
+export interface LandingFeaturedLink {
+  id: string;
+  title: string;
+  description: string;
+  image: string | null;
+  url: string;
+  badge: string;
+  order: number;
+}
+
+export interface LandingTeamMember {
+  id: string;
+  roleOverride: string;
+  order: number;
+  author: {
+    id: string;
+    name: string;
+    slug: string;
+    bio: string;
+    avatar: string | null;
+    role: string;
+    isTeamMember: boolean;
+    isInstructor: boolean;
+    socialLinks: Record<string, unknown>;
+  };
+}
+
+// ── Phase 6 — Layout-specific sub-models ────────────────────────────────────
+
+export interface LandingIndustry {
+  id: string;
+  name: string;
+  icon: string;
+  image: string | null;
+  order: number;
+}
+
+export interface LandingBentoCell {
+  id: string;
+  module: string;       // 'blog' | 'products' | 'reviews' | 'recipes' | 'listings'
+  sourceId: number;
+  span: string;         // 'regular' | 'wide' | 'tall'
   order: number;
 }
 
@@ -534,6 +724,21 @@ export interface LandingLogo {
   order: number;
 }
 
+/** Polymorphic optional block on a LandingPage.
+ *
+ *  ``data`` is a JSON object whose shape depends on ``blockType``. The
+ *  catalogue of types lives at ``backend/content/models.py::LandingCustomBlock``.
+ *  Each component under ``website/components/landingpage/blocks/`` documents
+ *  the payload it expects.
+ */
+export interface LandingCustomBlock {
+  id: string;
+  blockType: string;
+  data: Record<string, unknown>;
+  enabled: boolean;
+  order: number;
+}
+
 export interface LandingPage {
   id: string;
   title: string;
@@ -577,6 +782,108 @@ export interface LandingPage {
   statsEnabled: boolean;
   logobarEnabled: boolean;
   ctaEnabled: boolean;
+  // v2 · Sticky bar (universal opt-in promo bar at the top of the page)
+  stickyBarEnabled: boolean;
+  stickyBarText: string;
+  stickyBarCtaText: string;
+  stickyBarCtaUrl: string;
+  stickyBarEndsAt: string | null;
+  stickyBarStyle: string;
+  // v2 · Hero video URL (optional; renderer falls back to heroImage)
+  heroVideoUrl: string;
+  // v2 · Conditional module rendering — controls what the layout shows from
+  // the tenant's content modules and how many items are pulled in.
+  blogSectionEnabled: boolean;
+  blogSource: string;        // latest | featured | category
+  blogCount: number;
+  blogCategorySlug: string;
+  blogShowFilters: boolean;
+  productsSectionEnabled: boolean;
+  productsSource: string;    // latest | bestsellers | featured | category
+  productsCount: number;
+  productsLayout: string;    // grid | carousel | curriculum
+  productsCategorySlug: string;
+  productsShowFilters: boolean;
+  reviewsSectionEnabled: boolean;
+  reviewsShowAggregate: boolean;
+  reviewsCount: number;
+  reviewsSource: string;     // latest | highest
+  recipesSectionEnabled: boolean;
+  recipesCount: number;
+  listingsSectionEnabled: boolean;
+  listingsCount: number;
+  // Per-section labels — empty → renderer falls back to layout default
+  blogSectionHeading: string;
+  blogSectionLinkText: string;
+  blogSectionLinkUrl: string;
+  productsSectionHeading: string;
+  productsSectionLinkText: string;
+  productsSectionLinkUrl: string;
+  reviewsSectionHeading: string;
+  recipesSectionHeading: string;
+  recipesSectionLinkText: string;
+  recipesSectionLinkUrl: string;
+  listingsSectionHeading: string;
+  listingsSectionLinkText: string;
+  listingsSectionLinkUrl: string;
+  // v2 · SEO / Social / Schema (Phase 3)
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string | null;
+  twitterCardType: string;       // 'summary' | 'summary_large_image'
+  canonicalUrl: string;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
+  includeInSitemap: boolean;
+  schemaType: string;            // 'auto' | 'organization' | 'course' | ...
+  schemaOverrides: Record<string, unknown>;
+  showReadingTime: boolean;
+  showLastUpdated: boolean;
+  showBreadcrumbs: boolean;
+  stickyTocEnabled: boolean;
+  // v2 · Phase 4 — Cross-layout opt-in blocks
+  pressMentionsEnabled: boolean;
+  pressMentionsHeading: string;
+  comparisonEnabled: boolean;
+  comparisonHeading: string;
+  pressMentions: LandingPressMention[];
+  comparisonRows: LandingComparisonRow[];
+  newsletter: LandingNewsletterBlock | null;
+  // v2 · Phase 5 — Specialty sub-models
+  processEnabled: boolean;
+  processHeading: string;
+  outcomesEnabled: boolean;
+  outcomesHeading: string;
+  bonusesEnabled: boolean;
+  bonusesHeading: string;
+  awardsEnabled: boolean;
+  awardsHeading: string;
+  teamEnabled: boolean;
+  teamHeading: string;
+  processSteps: LandingProcessStep[];
+  outcomes: LandingOutcome[];
+  bonuses: LandingBonus[];
+  awards: LandingAward[];
+  socialLinks: LandingSocialLink[];
+  featuredLinks: LandingFeaturedLink[];
+  teamMembers: LandingTeamMember[];
+  // v2 · Phase 6 — Layout-specific
+  stickySectionNavEnabled: boolean;
+  macroPillNavEnabled: boolean;   // Macro layout — opt-in floating pill nav over the hero
+  industriesEnabled: boolean;
+  industriesHeading: string;
+  industries: LandingIndustry[];
+  bentoCells: LandingBentoCell[];
+  // v2 · Inline contact form (opt-in)
+  contactFormEnabled: boolean;
+  contactFormHeading: string;
+  contactFormSubheading: string;
+  contactFormNamePlaceholder: string;
+  contactFormEmailPlaceholder: string;
+  contactFormMessagePlaceholder: string;
+  contactFormButtonText: string;
+  contactFormSuccessTitle: string;
+  contactFormSuccessBody: string;
   createdAt: string;
   updatedAt: string;
   features: LandingFeature[];
@@ -585,6 +892,8 @@ export interface LandingPage {
   faqItems: LandingFaqItem[];
   statItems: LandingStatItem[];
   logos: LandingLogo[];
+  // v2 · Polymorphic optional blocks (marquee, manifesto, guarantee, etc.)
+  customBlocks: LandingCustomBlock[];
 }
 
 export interface LandingPageSummary {
@@ -595,6 +904,10 @@ export interface LandingPageSummary {
   heroSubheadline: string;
   heroImage: string | null;
   heroBadge: string;
+  // v2 · sitemap-relevant fields
+  rootPath: string;
+  canonicalUrl: string;
+  includeInSitemap: boolean;
 }
 
 export async function getLandingPages(): Promise<LandingPageSummary[]> {
@@ -602,15 +915,17 @@ export async function getLandingPages(): Promise<LandingPageSummary[]> {
     `query LandingPages {
       landingPages {
         id title slug heroHeadline heroSubheadline heroImage heroBadge
+        rootPath canonicalUrl includeInSitemap
       }
     }`,
   );
+  // Sitemap consumers filter on includeInSitemap; UI consumers ignore it.
   return data.landingPages;
 }
 
 const LANDING_PAGE_FIELDS = `
   id title slug status layout rootPath metaTitle metaDescription
-  heroBadge heroHeadline heroSubheadline heroBody heroImage heroStyle
+  heroBadge heroHeadline heroSubheadline heroBody heroImage heroStyle heroVideoUrl
   heroPrimaryCtaText heroPrimaryCtaUrl heroSecondaryCtaText heroSecondaryCtaUrl
   featuresHeading featuresSubheading featuresLayout
   testimonialsHeading
@@ -619,13 +934,49 @@ const LANDING_PAGE_FIELDS = `
   ctaHeading ctaSubheading ctaPrimaryText ctaPrimaryUrl ctaSecondaryText ctaSecondaryUrl ctaStyle
   heroEnabled featuresEnabled testimonialsEnabled pricingEnabled
   faqEnabled statsEnabled logobarEnabled ctaEnabled
+  stickyBarEnabled stickyBarText stickyBarCtaText stickyBarCtaUrl stickyBarEndsAt stickyBarStyle
+  blogSectionEnabled blogSource blogCount blogCategorySlug blogShowFilters
+  productsSectionEnabled productsSource productsCount productsLayout productsCategorySlug productsShowFilters
+  reviewsSectionEnabled reviewsShowAggregate reviewsCount reviewsSource
+  recipesSectionEnabled recipesCount
+  listingsSectionEnabled listingsCount
+  blogSectionHeading blogSectionLinkText blogSectionLinkUrl
+  productsSectionHeading productsSectionLinkText productsSectionLinkUrl
+  reviewsSectionHeading
+  recipesSectionHeading recipesSectionLinkText recipesSectionLinkUrl
+  listingsSectionHeading listingsSectionLinkText listingsSectionLinkUrl
+  ogTitle ogDescription ogImage twitterCardType
+  canonicalUrl robotsIndex robotsFollow includeInSitemap
+  schemaType schemaOverrides
+  showReadingTime showLastUpdated showBreadcrumbs stickyTocEnabled
+  pressMentionsEnabled pressMentionsHeading comparisonEnabled comparisonHeading
+  processEnabled processHeading outcomesEnabled outcomesHeading
+  bonusesEnabled bonusesHeading awardsEnabled awardsHeading
+  teamEnabled teamHeading
+  stickySectionNavEnabled macroPillNavEnabled industriesEnabled industriesHeading
+  contactFormEnabled contactFormHeading contactFormSubheading
+  contactFormNamePlaceholder contactFormEmailPlaceholder contactFormMessagePlaceholder
+  contactFormButtonText contactFormSuccessTitle contactFormSuccessBody
   createdAt updatedAt
-  features { id title icon description linkText linkUrl order }
+  features { id title icon image description linkText linkUrl span order }
+  pressMentions { id mediaName quote logo url order }
+  comparisonRows { id featureName values order }
+  newsletter { id heading subheading placeholder buttonText successMessage provider providerListId enabled }
+  processSteps { id stepNumber title description duration icon image order }
+  outcomes { id title description icon image order }
+  bonuses { id title description valueUsd icon image order }
+  awards { id title organization year image url order }
+  socialLinks { id platform url order }
+  featuredLinks { id title description image url badge order }
+  teamMembers { id roleOverride order author { id name slug bio avatar role isTeamMember isInstructor socialLinks } }
+  industries { id name icon image order }
+  bentoCells { id module sourceId span order }
   testimonials { id quote authorName authorTitle authorCompany avatar rating order }
   pricingPlans { id name description monthlyPrice annualPrice features ctaText ctaUrl isHighlighted badge order }
   faqItems { id question answer order }
   statItems { id value label description order }
   logos { id name url image order }
+  customBlocks { id blockType data enabled order }
 `;
 
 export async function getLandingPage(slug: string): Promise<LandingPage | null> {

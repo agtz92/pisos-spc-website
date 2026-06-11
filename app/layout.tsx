@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import { getTenant } from '@/lib/graphql';
+import { getTenant, resolveMediaUrl } from '@/lib/graphql';
 import { ModernLayout } from '@/lib/templates/modern';
 import { RetroLayout } from '@/lib/templates/retro';
 import { FuturisticLayout } from '@/lib/templates/futuristic';
 import { ExecutiveLayout } from '@/lib/templates/executive';
+import WhatsAppFloat from '@/components/WhatsAppFloat';
 import './globals.css';
 
 export const revalidate = 60;
@@ -25,11 +26,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   const siteName = tenant?.name ?? 'Pisos SPC';
+  const logo = resolveMediaUrl(tenant?.logo);
   const enabledModules = tenant?.modules ?? [];
   const template = tenant?.template ?? 'modern';
   const savedConfig = (tenant?.templateConfig?.[template] ?? {}) as Record<string, unknown>;
 
-  const layoutProps = { siteName, enabledModules, savedConfig, children };
+  const layoutProps = { siteName, logo, enabledModules, savedConfig, children };
 
   let TemplateLayout: React.ComponentType<typeof layoutProps>;
   if (template === 'retro') {
@@ -58,6 +60,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div suppressHydrationWarning dangerouslySetInnerHTML={{ __html: customBodyStart }} />
         ) : null}
         <TemplateLayout {...layoutProps} />
+        {/* WhatsApp floating CTA — tenant-configurable; renders nothing
+            unless the tenant enables it AND provides a phone. Phase 2
+            will allow per-page overrides via prop drilling from the
+            page renderer (LandingPage, Post, UtilityPage). */}
+        <WhatsAppFloat
+          enabled={tenant?.whatsappEnabled ?? false}
+          phone={tenant?.whatsappPhone ?? ''}
+          message={tenant?.whatsappMessage ?? ''}
+          lottieEnabled={tenant?.whatsappLottieEnabled ?? true}
+        />
         {customBodyEnd ? (
           <div suppressHydrationWarning dangerouslySetInnerHTML={{ __html: customBodyEnd }} />
         ) : null}

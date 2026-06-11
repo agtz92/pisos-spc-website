@@ -9,6 +9,7 @@ import { ModernGlobalStyles } from './ModernGlobalStyles';
 
 interface TemplateLayoutProps {
   siteName: string;
+  logo?: string | null;
   enabledModules: string[];
   savedConfig?: Record<string, unknown>;
   children: React.ReactNode;
@@ -44,7 +45,7 @@ function resolveModernColors(
   return merged;
 }
 
-export function ModernLayout({ siteName, enabledModules, savedConfig, children }: TemplateLayoutProps) {
+export function ModernLayout({ siteName, logo, enabledModules, savedConfig, children }: TemplateLayoutProps) {
   const savedColors = (savedConfig?.colors ?? {}) as Partial<ModernTemplateColors>;
   const colors = resolveModernColors(modernConfig.colors, savedColors);
 
@@ -78,13 +79,13 @@ export function ModernLayout({ siteName, enabledModules, savedConfig, children }
       <ModernGridBackground colors={colors} />
 
       <div className="relative flex min-h-full flex-col">
-        <ModernHeader siteName={siteName} colors={colors} copy={copy} navItems={navItems} today={today} />
+        <ModernHeader siteName={siteName} logo={logo} colors={colors} copy={copy} navItems={navItems} today={today} />
 
         <main className="modern-content relative z-10 flex-1 w-full pb-16 sm:pb-24">
           {children}
         </main>
 
-        <ModernFooter siteName={siteName} colors={colors} copy={copy} navItems={navItems} />
+        <ModernFooter siteName={siteName} logo={logo} colors={colors} copy={copy} navItems={navItems} />
       </div>
 
       <ModernGlobalStyles colors={colors} />

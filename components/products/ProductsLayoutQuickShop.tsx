@@ -36,6 +36,7 @@ import Link from 'next/link';
 import type { Product, Category } from '@/lib/graphql';
 import { resolveMediaUrl } from '@/lib/graphql';
 import { CategoryFilterBar } from '@/components/CategoryFilterBar';
+import { getStockBadge, type StockConfig } from '@/lib/product-stock';
 
 function formatPrice(price: string | null): string | null {
   if (!price) return null;
@@ -44,11 +45,14 @@ function formatPrice(price: string | null): string | null {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-function QuickShopCard({ product }: { product: Product }) {
+function QuickShopCard({ product, stockConfig }: { product: Product; stockConfig: StockConfig | null | undefined }) {
   const imageUrl = resolveMediaUrl(product.coverImage);
   const price = formatPrice(product.price);
   const compareAt = formatPrice(product.compareAtPrice);
-  const inStock = product.stock == null || product.stock > 0;
+  const stock = getStockBadge(product.stock, stockConfig);
+  // Fall back to the raw "stock > 0" check when the tenant has disabled the
+  // badge (we still need to switch the CTA between Shop Now / Notify Me).
+  const inStock = stock ? stock.inStock : (product.stock == null || product.stock > 0);
   const onSale = product.price && product.compareAtPrice
     ? parseFloat(product.compareAtPrice) > parseFloat(product.price)
     : false;
@@ -69,10 +73,10 @@ function QuickShopCard({ product }: { product: Product }) {
             Sale
           </span>
         )}
-        {!inStock && (
+        {stock && !stock.inStock && (
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span data-product-badge style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: 'var(--template-muted-text, #9ca3af)', padding: '0.25rem 0.6rem', background: 'rgba(255,255,255,0.9)', borderRadius: 6 }}>
-              Sold Out
+            <span data-product-badge style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: stock.color, padding: '0.25rem 0.6rem', background: 'rgba(255,255,255,0.9)', borderRadius: 6, border: `1px solid ${stock.color}` }}>
+              {stock.label}
             </span>
           </div>
         )}
@@ -125,15 +129,16 @@ function QuickShopCard({ product }: { product: Product }) {
 interface Props {
   products: Product[];
   categories: Category[];
+  stockConfig?: StockConfig | null;
 }
 
-export default function ProductsLayoutQuickShop({ products, categories }: Props) {
+export default function ProductsLayoutQuickShop({ products, categories, stockConfig }: Props) {
   return (
     <div>
       <CategoryFilterBar categories={categories} basePath="/products/category/" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((p) => <QuickShopCard key={p.slug} product={p} />)}
+          {products.map((p) => <QuickShopCard key={p.slug} product={p} stockConfig={stockConfig} />)}
         </div>
       </div>
     </div>

@@ -55,13 +55,19 @@ export default async function ProductsPage() {
     );
   }
 
+  // ``tenant`` already carries the stock-config subset (Product Stock fields
+  // were added to TenantInfo + the GraphQL fragment in lib/graphql.ts).
+  // Passing it as ``stockConfig`` lets each renderer compute its badge with
+  // tenant-defined text + color, instead of the old hardcoded green/red.
+  const stockConfig = tenant ?? null;
+
   let layout: React.ReactNode;
-  if (layoutVariant === 'showcase')   layout = <ProductsLayoutShowcase   products={products} categories={categories} />;
-  else if (layoutVariant === 'catalog')    layout = <ProductsLayoutCatalog    products={products} categories={categories} />;
-  else if (layoutVariant === 'lookbook')   layout = <ProductsLayoutLookbook   products={products} categories={categories} />;
-  else if (layoutVariant === 'quick-shop') layout = <ProductsLayoutQuickShop  products={products} categories={categories} />;
-  else if (layoutVariant === 'macro')      layout = <ProductsLayoutMacro     products={products} categories={categories} />;
-  else                                     layout = <ProductsLayoutGrid products={products} categories={categories} />;
+  if (layoutVariant === 'showcase')   layout = <ProductsLayoutShowcase   products={products} categories={categories} stockConfig={stockConfig} />;
+  else if (layoutVariant === 'catalog')    layout = <ProductsLayoutCatalog    products={products} categories={categories} stockConfig={stockConfig} />;
+  else if (layoutVariant === 'lookbook')   layout = <ProductsLayoutLookbook   products={products} categories={categories} stockConfig={stockConfig} />;
+  else if (layoutVariant === 'quick-shop') layout = <ProductsLayoutQuickShop  products={products} categories={categories} stockConfig={stockConfig} />;
+  else if (layoutVariant === 'macro')      layout = <ProductsLayoutMacro     products={products} categories={categories} stockConfig={stockConfig} />;
+  else                                     layout = <ProductsLayoutGrid products={products} categories={categories} stockConfig={stockConfig} />;
 
   return <div style={moduleStyle}>{layout}</div>;
 }

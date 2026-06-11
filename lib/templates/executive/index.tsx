@@ -8,6 +8,7 @@ import { ExecutiveGlobalStyles } from './ExecutiveGlobalStyles';
 
 interface TemplateLayoutProps {
   siteName: string;
+  logo?: string | null;
   enabledModules: string[];
   savedConfig?: Record<string, unknown>;
   children: React.ReactNode;
@@ -15,7 +16,7 @@ interface TemplateLayoutProps {
 
 const executiveConfig = getTemplateConfig('executive');
 
-export function ExecutiveLayout({ siteName, enabledModules, savedConfig, children }: TemplateLayoutProps) {
+export function ExecutiveLayout({ siteName, logo, enabledModules, savedConfig, children }: TemplateLayoutProps) {
   const savedColors = (savedConfig?.colors ?? {}) as Partial<ExecutiveTemplateColors>;
   const colors: ExecutiveTemplateColors = { ...executiveConfig.colors, ...savedColors };
 
@@ -44,13 +45,13 @@ export function ExecutiveLayout({ siteName, enabledModules, savedConfig, childre
         ...(cssVars as React.CSSProperties),
       }}
     >
-      <ExecutiveHeader siteName={siteName} colors={colors} navItems={navItems} />
+      <ExecutiveHeader siteName={siteName} logo={logo} colors={colors} navItems={navItems} />
 
       <main className="executive-content relative z-10 flex-1 w-full pb-16 sm:pb-24">
         {children}
       </main>
 
-      <ExecutiveFooter siteName={siteName} colors={colors} copy={copy} navItems={navItems} />
+      <ExecutiveFooter siteName={siteName} logo={logo} colors={colors} copy={copy} navItems={navItems} />
 
       <ExecutiveGlobalStyles colors={colors} />
     </div>

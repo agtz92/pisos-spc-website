@@ -1,18 +1,20 @@
 import Link from 'next/link';
 import { getTemplateConfig } from '../config';
 import { RetroPanelBox } from './RetroPanelBox';
+import { TenantLogo } from '../TenantLogo';
 
 type RetroColors = ReturnType<typeof getTemplateConfig<'retro'>>['colors'];
 type RetroCopy = ReturnType<typeof getTemplateConfig<'retro'>>['copy'];
 
 interface RetroFooterProps {
   siteName: string;
+  logo?: string | null;
   colors: RetroColors;
   copy: RetroCopy;
   navItems: { label: string; href: string }[];
 }
 
-export function RetroFooter({ siteName, colors, copy, navItems }: RetroFooterProps) {
+export function RetroFooter({ siteName, logo, colors, copy, navItems }: RetroFooterProps) {
   return (
     <footer className="px-3 pb-4 sm:px-5 sm:pb-6">
       <RetroPanelBox
@@ -40,20 +42,26 @@ export function RetroFooter({ siteName, colors, copy, navItems }: RetroFooterPro
             >
               {copy.footerEyebrow}
             </p>
-            <Link
-              href="/"
-              className="retro-site-name mt-3 inline-block no-underline"
-              style={{
-                color: colors.ink,
-                fontFamily: '"Arial Black", Impact, sans-serif',
-                fontSize: '1.7rem',
-                lineHeight: 1,
-                letterSpacing: '-0.04em',
-                textShadow: `2px 2px 0 ${colors.highlight}`,
-              }}
-            >
-              {siteName}
-            </Link>
+            {logo ? (
+              <span className="mt-3 inline-block">
+                <TenantLogo src={logo} alt={siteName} variant="footer" />
+              </span>
+            ) : (
+              <Link
+                href="/"
+                className="retro-site-name mt-3 inline-block no-underline"
+                style={{
+                  color: colors.ink,
+                  fontFamily: '"Arial Black", Impact, sans-serif',
+                  fontSize: '1.7rem',
+                  lineHeight: 1,
+                  letterSpacing: '-0.04em',
+                  textShadow: `2px 2px 0 ${colors.highlight}`,
+                }}
+              >
+                {siteName}
+              </Link>
+            )}
             <p
               className="mt-4 max-w-md"
               style={{ fontSize: '0.92rem', lineHeight: 1.7, color: colors.mutedText }}

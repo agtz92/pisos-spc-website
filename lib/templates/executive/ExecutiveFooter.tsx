@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import type { ExecutiveTemplateColors } from '../config';
+import { TenantLogo } from '../TenantLogo';
 
 interface ExecutiveFooterProps {
   siteName: string;
+  logo?: string | null;
   colors: ExecutiveTemplateColors;
   copy: {
     footerTagline: string;
@@ -42,7 +44,7 @@ function LogoMark({ color }: { color: string }) {
   );
 }
 
-export function ExecutiveFooter({ siteName, colors, copy, navItems }: ExecutiveFooterProps) {
+export function ExecutiveFooter({ siteName, logo, colors, copy, navItems }: ExecutiveFooterProps) {
   return (
     <footer
       style={{
@@ -61,16 +63,20 @@ export function ExecutiveFooter({ siteName, colors, copy, navItems }: ExecutiveF
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]">
           <div>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2.5 no-underline"
-              style={{ color: 'inherit' }}
-            >
-              <LogoMark color={colors.accent} />
-              <span style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-0.02em', color: colors.ink }}>
-                {siteName}
-              </span>
-            </Link>
+            {logo ? (
+              <TenantLogo src={logo} alt={siteName} variant="footer" />
+            ) : (
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2.5 no-underline"
+                style={{ color: 'inherit' }}
+              >
+                <LogoMark color={colors.accent} />
+                <span style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-0.02em', color: colors.ink }}>
+                  {siteName}
+                </span>
+              </Link>
+            )}
             <p
               className="mt-4 max-w-md"
               style={{ fontSize: '0.875rem', lineHeight: 1.7, color: colors.mutedText }}

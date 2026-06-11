@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ModernTemplateColors } from '../config';
 import { MobileNav } from '../MobileNav';
 import { ModernPolygonMark } from './ModernPolygonMark';
+import { TenantLogo } from '../TenantLogo';
 
 function UtilityIcon({ label, colors }: { label: string; colors: ModernTemplateColors }) {
   const isProfile = label === 'Profile';
@@ -38,13 +39,14 @@ function UtilityIcon({ label, colors }: { label: string; colors: ModernTemplateC
 
 interface ModernHeaderProps {
   siteName: string;
+  logo?: string | null;
   colors: ModernTemplateColors;
   copy: { utilityBarLabel: string; headerTagline: string };
   navItems: { label: string; href: string }[];
   today: string;
 }
 
-export function ModernHeader({ siteName, colors, copy, navItems, today }: ModernHeaderProps) {
+export function ModernHeader({ siteName, logo, colors, copy, navItems, today }: ModernHeaderProps) {
   return (
     <header
       className="sticky top-0 z-30 border-b backdrop-blur-xl"
@@ -63,27 +65,31 @@ export function ModernHeader({ siteName, colors, copy, navItems, today }: Modern
 
       <div className="mx-auto max-w-7xl px-4 pb-5 pt-4 sm:px-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <Link href="/" className="modern-logo-link inline-flex items-center gap-4 no-underline" style={{ color: 'inherit' }}>
-            <span className="modern-polygon-mark"><ModernPolygonMark colors={colors} /></span>
-            <div className="leading-none">
-              <div
-                style={{
-                  fontFamily: '"Arial Black", Impact, "Segoe UI", sans-serif',
-                  fontSize: 'clamp(2.8rem, 7vw, 5.1rem)',
-                  letterSpacing: '-0.07em',
-                  lineHeight: 0.9,
-                  background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentStrong} 100%)`,
-                  WebkitBackgroundClip: 'text',
-                  color: 'transparent',
-                }}
-              >
-                {siteName}
+          {logo ? (
+            <TenantLogo src={logo} alt={siteName} variant="header" />
+          ) : (
+            <Link href="/" className="modern-logo-link inline-flex items-center gap-4 no-underline" style={{ color: 'inherit' }}>
+              <span className="modern-polygon-mark"><ModernPolygonMark colors={colors} /></span>
+              <div className="leading-none">
+                <div
+                  style={{
+                    fontFamily: '"Arial Black", Impact, "Segoe UI", sans-serif',
+                    fontSize: 'clamp(2.8rem, 7vw, 5.1rem)',
+                    letterSpacing: '-0.07em',
+                    lineHeight: 0.9,
+                    background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentStrong} 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                  }}
+                >
+                  {siteName}
+                </div>
+                <p style={{ marginTop: 10, fontSize: '0.74rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: colors.mutedText }}>
+                  {copy.headerTagline}
+                </p>
               </div>
-              <p style={{ marginTop: 10, fontSize: '0.74rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: colors.mutedText }}>
-                {copy.headerTagline}
-              </p>
-            </div>
-          </Link>
+            </Link>
+          )}
 
           <div className="flex flex-col items-start gap-4 lg:items-end">
             {navItems.length > 0 && (

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getTemplateConfig } from '../config';
 import { MobileNav } from '../MobileNav';
 import { RetroPanelBox } from './RetroPanelBox';
+import { TenantLogo } from '../TenantLogo';
 
 type RetroColors = ReturnType<typeof getTemplateConfig<'retro'>>['colors'];
 type RetroCopy = ReturnType<typeof getTemplateConfig<'retro'>>['copy'];
@@ -51,13 +52,14 @@ function RetroStamp({ colors }: { colors: RetroColors }) {
 
 interface RetroHeaderProps {
   siteName: string;
+  logo?: string | null;
   colors: RetroColors;
   copy: RetroCopy & Record<string, string>;
   navItems: { label: string; href: string }[];
   currentYear: number;
 }
 
-export function RetroHeader({ siteName, colors, copy, navItems, currentYear }: RetroHeaderProps) {
+export function RetroHeader({ siteName, logo, colors, copy, navItems, currentYear }: RetroHeaderProps) {
   return (
     <header className="px-3 py-3 sm:px-5 sm:py-5">
       <RetroPanelBox
@@ -105,20 +107,26 @@ export function RetroHeader({ siteName, colors, copy, navItems, currentYear }: R
                 <p style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: colors.mutedText }}>
                   {copy.metaLabel}
                 </p>
-                <Link
-                  href="/"
-                  className="retro-site-name mt-2 no-underline"
-                  style={{
-                    color: colors.ink,
-                    fontFamily: '"Arial Black", Impact, "Trebuchet MS", sans-serif',
-                    fontSize: 'clamp(2.3rem, 4vw, 3.3rem)',
-                    lineHeight: 0.95,
-                    letterSpacing: '-0.05em',
-                    textShadow: `2px 2px 0 ${colors.highlight}`,
-                  }}
-                >
-                  {siteName}
-                </Link>
+                {logo ? (
+                  <span className="mt-2 inline-block">
+                    <TenantLogo src={logo} alt={siteName} variant="header" />
+                  </span>
+                ) : (
+                  <Link
+                    href="/"
+                    className="retro-site-name mt-2 no-underline"
+                    style={{
+                      color: colors.ink,
+                      fontFamily: '"Arial Black", Impact, "Trebuchet MS", sans-serif',
+                      fontSize: 'clamp(2.3rem, 4vw, 3.3rem)',
+                      lineHeight: 0.95,
+                      letterSpacing: '-0.05em',
+                      textShadow: `2px 2px 0 ${colors.highlight}`,
+                    }}
+                  >
+                    {siteName}
+                  </Link>
+                )}
                 <p className="mt-4 max-w-[24rem]" style={{ fontSize: '0.9rem', lineHeight: 1.7, color: colors.mutedText }}>
                   {copy.tagline}
                 </p>

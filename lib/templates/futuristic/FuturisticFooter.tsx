@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { getTemplateConfig } from '../config';
 import { FuturisticFramePill } from './FuturisticFramePill';
+import { TenantLogo } from '../TenantLogo';
 
 type FuturisticColors = ReturnType<typeof getTemplateConfig<'futuristic'>>['colors'];
 
 interface FuturisticFooterProps {
   siteName: string;
+  logo?: string | null;
   colors: FuturisticColors;
   copy: {
     footerPrefix: string;
@@ -21,7 +23,7 @@ interface FuturisticFooterProps {
   navItems: { label: string; href: string }[];
 }
 
-export function FuturisticFooter({ siteName, colors, copy, navItems }: FuturisticFooterProps) {
+export function FuturisticFooter({ siteName, logo, colors, copy, navItems }: FuturisticFooterProps) {
   const footerPrefix = copy.footerPrefix;
   return (
     <footer className="relative z-10 px-4 pb-6 pt-2 sm:px-6">
@@ -51,19 +53,25 @@ export function FuturisticFooter({ siteName, colors, copy, navItems }: Futuristi
             >
               {footerPrefix} {copy.footerSubtitle}
             </p>
-            <Link
-              href="/"
-              className="mt-2 inline-block no-underline"
-              style={{
-                color: colors.ink,
-                fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
-                fontWeight: 800,
-                fontSize: '1.6rem',
-                letterSpacing: '-0.04em',
-              }}
-            >
-              {siteName}
-            </Link>
+            {logo ? (
+              <span className="mt-2 inline-block">
+                <TenantLogo src={logo} alt={siteName} variant="footer" />
+              </span>
+            ) : (
+              <Link
+                href="/"
+                className="mt-2 inline-block no-underline"
+                style={{
+                  color: colors.ink,
+                  fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
+                  fontWeight: 800,
+                  fontSize: '1.6rem',
+                  letterSpacing: '-0.04em',
+                }}
+              >
+                {siteName}
+              </Link>
+            )}
             <p className="mt-3 max-w-md text-sm leading-7" style={{ color: colors.mutedText }}>
               {copy.footerDescription}
             </p>

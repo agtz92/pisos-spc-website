@@ -2,6 +2,7 @@ import { getLandingPageByRootSlug } from '@/lib/graphql';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { fetchLandingPageModules, renderLandingPage } from '@/lib/render-landing-page';
+import { buildMetadata } from '@/lib/landing-page-seo';
 
 export const revalidate = 60;
 
@@ -14,10 +15,7 @@ export async function generateMetadata({
   try {
     const page = await getLandingPageByRootSlug(rootSlug);
     if (!page) return {};
-    return {
-      title: page.metaTitle || page.title,
-      description: page.metaDescription || undefined,
-    };
+    return buildMetadata(page);
   } catch {
     return {};
   }
@@ -31,6 +29,6 @@ export default async function RootSlugPage({
   const { rootSlug } = await params;
   const page = await getLandingPageByRootSlug(rootSlug).catch(() => null);
   if (!page) notFound();
-  const modules = await fetchLandingPageModules();
-  return renderLandingPage(page, modules);
+  const modules = await fetchLandingPageModules(page);
+  return await renderLandingPage(page, modules);
 }

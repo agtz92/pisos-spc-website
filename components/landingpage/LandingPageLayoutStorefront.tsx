@@ -11,6 +11,12 @@ import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
 import { t, FeatureIcon, StarRating, type ModuleData, type Product, type Post, type Review } from './sections';
+import {
+  PressMentions, ComparisonTable, ReviewsAggregate, NewsletterSignup,
+  BentoFeatures, IndustriesGrid, TeamGrid, ProcessTimeline,
+} from './blocks';
+import LayoutHero from './LayoutHero';
+import LayoutCTA from './LayoutCTA';
 
 export default function LandingPageLayoutStorefront({ page, modules }: { page: LandingPage; modules: ModuleData }) {
   const heroImage = resolveMediaUrl(page.heroImage);
@@ -20,41 +26,8 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
 
   return (
     <main>
-      {/* ── Hero: full-bleed background image ────────────────────────── */}
-      {page.heroEnabled && page.heroHeadline && (
-        <section className="relative min-h-[520px] lg:min-h-[620px] flex items-center overflow-hidden">
-          {/* Background image */}
-          {heroImage && (
-            <div className="absolute inset-0 z-0">
-              <Image src={heroImage} alt="" fill className="object-cover" priority />
-            </div>
-          )}
-          {/* Dark gradient overlay */}
-          <div className="absolute inset-0 z-[1]" style={{ background: heroImage ? 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.3) 100%)' : t.mutedPanel }} />
-          {/* Content */}
-          <div className="storefront-hero-overlay relative z-10 max-w-6xl mx-auto px-4 py-24 lg:py-32 w-full">
-            <style>{`.storefront-hero-overlay * { color: ${heroImage ? '#ffffff' : t.ink} !important; }`}</style>
-            <div className="max-w-2xl">
-              {page.heroBadge && (
-                <span data-lp-badge className="inline-block mb-5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-full" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.25)' }}>
-                  {page.heroBadge}
-                </span>
-              )}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] tracking-tight">
-                {page.heroHeadline}
-              </h1>
-              {page.heroSubheadline && <p className="mt-5 text-lg sm:text-xl leading-relaxed" style={{ opacity: 0.9 }}>{page.heroSubheadline}</p>}
-              {page.heroBody && <p className="mt-4 text-base leading-relaxed" style={{ opacity: 0.75 }}>{page.heroBody}</p>}
-              {(page.heroPrimaryCtaText || page.heroSecondaryCtaText) && (
-                <div className="mt-10 flex flex-wrap gap-4">
-                  {page.heroPrimaryCtaText && <Link data-lp-primary-cta href={page.heroPrimaryCtaUrl || '#'} className="px-8 py-3.5 font-semibold rounded-xl shadow-lg transition-transform hover:scale-105" style={{ background: t.accent, color: '#fff !important' }}>{page.heroPrimaryCtaText}</Link>}
-                  {page.heroSecondaryCtaText && <Link data-lp-secondary-cta href={page.heroSecondaryCtaUrl || '#'} className="px-8 py-3.5 font-semibold rounded-xl transition-colors" style={{ border: '2px solid rgba(255,255,255,0.4)' }}>{page.heroSecondaryCtaText}</Link>}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* ── Hero — shared LayoutHero at "large" scale respects heroStyle. */}
+      <LayoutHero page={page} scale="large" />
 
       {/* ── Stats ──────────────────────────────────────────────────────── */}
       {page.statsEnabled && page.statItems.length > 0 && (
@@ -75,8 +48,8 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
         <section className="py-20" style={{ background: t.panel }}>
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center justify-between mb-10">
-              <h2 className="text-3xl font-bold" style={{ color: t.ink }}>Our Products</h2>
-              <Link href="/products" className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>View all →</Link>
+              <h2 className="text-3xl font-bold" style={{ color: t.ink }}>{page.productsSectionHeading || 'Our Products'}</h2>
+              <Link href={page.productsSectionLinkUrl || '/products'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.productsSectionLinkText || 'View all →'}</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {topProducts.map((p: Product) => {
@@ -97,8 +70,11 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
         </section>
       )}
 
-      {/* ── Features ───────────────────────────────────────────────────── */}
-      {page.featuresEnabled && page.features.length > 0 && (
+      {/* ── Features (bento layout switches to BentoFeatures component) ── */}
+      {page.featuresEnabled && page.features.length > 0 && page.featuresLayout === 'bento' && (
+        <BentoFeatures page={page} />
+      )}
+      {page.featuresEnabled && page.features.length > 0 && page.featuresLayout !== 'bento' && (
         <section className="py-20" style={{ background: t.mutedPanel }}>
           <div className="max-w-6xl mx-auto px-4">
             {(page.featuresHeading || page.featuresSubheading) && (
@@ -110,7 +86,7 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {page.features.map((f: LandingFeature) => (
                 <div data-lp-feature-card key={f.id} className="p-6 rounded-2xl transition-shadow hover:shadow-lg" style={{ background: t.panel, border: `1px solid ${t.panelBorder}` }}>
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: t.mutedPanel, color: t.accent }}><FeatureIcon icon={f.icon} /></div>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: t.mutedPanel, color: t.accent }}><FeatureIcon icon={f.icon} image={f.image} alt={f.title} /></div>
                   <h3 className="text-lg font-semibold" style={{ color: t.ink }}>{f.title}</h3>
                   <p className="mt-2 leading-relaxed" style={{ color: t.mutedText }}>{f.description}</p>
                   {f.linkText && f.linkUrl && <Link href={f.linkUrl} className="mt-3 inline-block text-sm font-semibold hover:underline" style={{ color: t.accent }}>{f.linkText} →</Link>}
@@ -121,11 +97,18 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
         </section>
       )}
 
+      {/* ── v2 — Industries / Process / Team (opt-in via flags) ─────────── */}
+      <IndustriesGrid page={page} />
+      <ProcessTimeline page={page} />
+
+      {/* ── v2 — Reviews aggregate widget (before module reviews) ───────── */}
+      <ReviewsAggregate page={page} modules={modules} />
+
       {/* ── MODULE: Reviews as social proof ─────────────────────────────── */}
       {topReviews.length > 0 && (
         <section className="py-16" style={{ background: t.panel, borderTop: `1px solid ${t.panelBorder}` }}>
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-2xl font-bold mb-8 text-center" style={{ color: t.ink }}>What People Are Saying</h2>
+            <h2 className="text-2xl font-bold mb-8 text-center" style={{ color: t.ink }}>{page.reviewsSectionHeading || 'What People Are Saying'}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {topReviews.map((r: Review) => (
                 <Link data-lp-review-card key={r.id} href={`/reviews/${r.slug}`} className="rounded-xl p-5 transition-shadow hover:shadow-md" style={{ background: t.mutedPanel, border: `1px solid ${t.panelBorder}` }}>
@@ -138,6 +121,9 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
           </div>
         </section>
       )}
+
+      {/* ── v2 — Press mentions strip ───────────────────────────────────── */}
+      <PressMentions page={page} />
 
       {/* ── Testimonials ───────────────────────────────────────────────── */}
       {page.testimonialsEnabled && page.testimonials.length > 0 && (
@@ -162,6 +148,9 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
           </div>
         </section>
       )}
+
+      {/* ── v2 — Comparison table (before pricing cards) ────────────────── */}
+      <ComparisonTable page={page} />
 
       {/* ── Pricing ────────────────────────────────────────────────────── */}
       {page.pricingEnabled && page.pricingPlans.length > 0 && (
@@ -189,13 +178,16 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
         </section>
       )}
 
+      {/* ── v2 — Team grid ──────────────────────────────────────────────── */}
+      <TeamGrid page={page} />
+
       {/* ── MODULE: Blog posts strip ───────────────────────────────────── */}
       {topPosts.length > 0 && (
         <section className="py-16" style={{ background: t.mutedPanel }}>
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold" style={{ color: t.ink }}>From Our Blog</h2>
-              <Link href="/blog" className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>Read more →</Link>
+              <h2 className="text-2xl font-bold" style={{ color: t.ink }}>{page.blogSectionHeading || 'From Our Blog'}</h2>
+              <Link href={page.blogSectionLinkUrl || '/blog'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'Read more →'}</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {topPosts.map((post: Post) => {
@@ -214,6 +206,9 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
           </div>
         </section>
       )}
+
+      {/* ── v2 — Newsletter (before FAQ) ────────────────────────────────── */}
+      {page.newsletter?.enabled && <NewsletterSignup page={page} block={page.newsletter} />}
 
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
       {page.faqEnabled && page.faqItems.length > 0 && (
@@ -245,20 +240,7 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
       )}
 
       {/* ── CTA ─────────────────────────────────────────────────────────── */}
-      {page.ctaEnabled && page.ctaHeading && (
-        <section className="py-20" style={{ background: page.ctaStyle === 'dark' ? t.ink : page.ctaStyle === 'brand' ? t.accent : t.panel, color: page.ctaStyle === 'default' || !page.ctaStyle ? t.ink : t.panel }}>
-          <div className="max-w-4xl mx-auto px-4 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold">{page.ctaHeading}</h2>
-            {page.ctaSubheading && <p className="mt-4 text-lg" style={{ opacity: page.ctaStyle === 'default' || !page.ctaStyle ? 1 : 0.85, color: page.ctaStyle === 'default' || !page.ctaStyle ? t.mutedText : 'inherit' }}>{page.ctaSubheading}</p>}
-            {(page.ctaPrimaryText || page.ctaSecondaryText) && (
-              <div className="mt-8 flex flex-wrap justify-center gap-4">
-                {page.ctaPrimaryText && <Link data-lp-primary-cta href={page.ctaPrimaryUrl || '#'} className="px-8 py-3 rounded-xl font-semibold shadow transition-colors" style={{ background: page.ctaStyle === 'default' || !page.ctaStyle ? t.accent : t.panel, color: page.ctaStyle === 'default' || !page.ctaStyle ? t.panel : t.ink }}>{page.ctaPrimaryText}</Link>}
-                {page.ctaSecondaryText && <Link data-lp-secondary-cta href={page.ctaSecondaryUrl || '#'} className="px-8 py-3 rounded-xl font-semibold transition-colors" style={{ border: page.ctaStyle === 'default' || !page.ctaStyle ? `2px solid ${t.panelBorder}` : '2px solid rgba(255,255,255,0.4)', color: page.ctaStyle === 'default' || !page.ctaStyle ? t.ink : 'inherit' }}>{page.ctaSecondaryText}</Link>}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      <LayoutCTA page={page} scale="regular" />
     </main>
   );
 }

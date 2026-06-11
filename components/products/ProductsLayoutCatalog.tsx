@@ -32,6 +32,8 @@ import Link from 'next/link';
 import type { Product, Category } from '@/lib/graphql';
 import { resolveMediaUrl } from '@/lib/graphql';
 import { CategoryFilterBar } from '@/components/CategoryFilterBar';
+import { getStockBadge, type StockConfig } from '@/lib/product-stock';
+import { stripMarkdown, truncate } from '@/lib/strip-markdown';
 
 function formatPrice(price: string | null): string | null {
   if (!price) return null;
@@ -40,11 +42,14 @@ function formatPrice(price: string | null): string | null {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-function CatalogRow({ product }: { product: Product }) {
+function CatalogRow({ product, stockConfig }: { product: Product; stockConfig: StockConfig | null | undefined }) {
   const imageUrl = resolveMediaUrl(product.coverImage);
   const price = formatPrice(product.price);
   const compareAt = formatPrice(product.compareAtPrice);
-  const inStock = product.stock == null || product.stock > 0;
+  const stock = getStockBadge(product.stock, stockConfig);
+  const previewText = product.shortDescription
+    ? truncate(stripMarkdown(product.shortDescription), 120)
+    : null;
 
   return (
     <article
@@ -81,9 +86,9 @@ function CatalogRow({ product }: { product: Product }) {
               {product.category.name}
             </Link>
           )}
-          {!inStock && (
-            <span data-product-badge style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.1rem 0.4rem', borderRadius: 999, background: 'var(--template-muted-panel, #f3f4f6)', color: 'var(--template-muted-text, #6b7280)' }}>
-              Out of stock
+          {stock && !stock.inStock && (
+            <span data-product-badge style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.1rem 0.4rem', borderRadius: 999, background: 'var(--template-muted-panel, #f3f4f6)', color: stock.color, border: `1px solid ${stock.color}` }}>
+              {stock.label}
             </span>
           )}
         </div>
@@ -92,9 +97,9 @@ function CatalogRow({ product }: { product: Product }) {
             {product.title}
           </Link>
         </h2>
-        {product.description && (
+        {(previewText || product.description) && (
           <p className="line-clamp-1" style={{ fontSize: '0.8rem', color: 'var(--template-muted-text, #6b7280)', marginTop: '0.2rem', lineHeight: 1.5 }}>
-            {product.description}
+            {previewText ?? product.description}
           </p>
         )}
         {product.brand && <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--template-muted-text, #6b7280)', marginTop: '0.2rem' }}>{product.brand}</p>}
@@ -117,9 +122,10 @@ function CatalogRow({ product }: { product: Product }) {
 interface Props {
   products: Product[];
   categories: Category[];
+  stockConfig?: StockConfig | null;
 }
 
-export default function ProductsLayoutCatalog({ products, categories }: Props) {
+export default function ProductsLayoutCatalog({ products, categories, stockConfig }: Props) {
   return (
     <div>
       <CategoryFilterBar categories={categories} basePath="/products/category/" />
@@ -132,7 +138,7 @@ export default function ProductsLayoutCatalog({ products, categories }: Props) {
           <div style={{ flex: 1, height: 1, background: 'var(--template-panel-border, #e5e7eb)' }} />
         </div>
         <div className="space-y-3">
-          {products.map((p) => <CatalogRow key={p.slug} product={p} />)}
+          {products.map((p) => <CatalogRow key={p.slug} product={p} stockConfig={stockConfig} />)}
         </div>
       </div>
     </div>

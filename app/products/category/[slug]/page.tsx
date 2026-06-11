@@ -1,4 +1,5 @@
 import { getProducts, getCategories } from '@/lib/graphql';
+import { getTenantCached } from '@/lib/modules';
 import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -23,9 +24,15 @@ export default async function ProductCategoryPage({ params }: { params: Promise<
   const { slug } = await params;
   let products: Awaited<ReturnType<typeof getProducts>> = [];
   let categoryName = slug;
+  let tenant: Awaited<ReturnType<typeof getTenantCached>> = null;
   try {
-    const [p, cats] = await Promise.all([getProducts({ categorySlug: slug }), getCategories('products')]);
+    const [p, cats, t] = await Promise.all([
+      getProducts({ categorySlug: slug }),
+      getCategories('products'),
+      getTenantCached(),
+    ]);
     products = p;
+    tenant = t;
     categoryName = cats.find((c) => c.slug === slug)?.name ?? slug;
   } catch { /* empty */ }
 
@@ -37,7 +44,7 @@ export default async function ProductCategoryPage({ params }: { params: Promise<
         <p className="text-gray-400 text-center py-16">No products in this category yet.</p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {products.map((p) => <ProductCard key={p.slug} product={p} />)}
+          {products.map((p) => <ProductCard key={p.slug} product={p} stockConfig={tenant} />)}
         </div>
       )}
     </div>

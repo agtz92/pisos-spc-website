@@ -10,6 +10,7 @@ import { RetroGlobalStyles } from './RetroGlobalStyles';
 
 interface TemplateLayoutProps {
   siteName: string;
+  logo?: string | null;
   enabledModules: string[];
   savedConfig?: Record<string, unknown>;
   children: React.ReactNode;
@@ -17,7 +18,7 @@ interface TemplateLayoutProps {
 
 const retroConfig = getTemplateConfig('retro');
 
-export function RetroLayout({ siteName, enabledModules, savedConfig, children }: TemplateLayoutProps) {
+export function RetroLayout({ siteName, logo, enabledModules, savedConfig, children }: TemplateLayoutProps) {
   const savedColors = (savedConfig?.colors ?? {}) as Partial<typeof retroConfig.colors>;
   const colors = { ...retroConfig.colors, ...savedColors };
 
@@ -62,6 +63,7 @@ export function RetroLayout({ siteName, enabledModules, savedConfig, children }:
       <div className="relative flex min-h-full flex-col">
         <RetroHeader
           siteName={siteName}
+          logo={logo}
           colors={colors}
           copy={copy}
           navItems={navItems}
@@ -82,7 +84,7 @@ export function RetroLayout({ siteName, enabledModules, savedConfig, children }:
           <RetroGlobalStyles colors={colors} />
         </main>
 
-        <RetroFooter siteName={siteName} colors={colors} copy={copy} navItems={navItems} />
+        <RetroFooter siteName={siteName} logo={logo} colors={colors} copy={copy} navItems={navItems} />
       </div>
     </div>
   );

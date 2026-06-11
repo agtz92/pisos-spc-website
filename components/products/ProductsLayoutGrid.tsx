@@ -26,19 +26,21 @@
 import type { Product, Category } from '@/lib/graphql';
 import ProductCard from '@/components/ProductCard';
 import { CategoryFilterBar } from '@/components/CategoryFilterBar';
+import type { StockConfig } from '@/lib/product-stock';
 
 interface Props {
   products: Product[];
   categories: Category[];
+  stockConfig?: StockConfig | null;
 }
 
-export default function ProductsLayoutGrid({ products, categories }: Props) {
+export default function ProductsLayoutGrid({ products, categories, stockConfig }: Props) {
   return (
     <div>
       <CategoryFilterBar categories={categories} basePath="/products/category/" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {products.map((p) => <ProductCard key={p.slug} product={p} />)}
+          {products.map((p) => <ProductCard key={p.slug} product={p} stockConfig={stockConfig} />)}
         </div>
       </div>
     </div>

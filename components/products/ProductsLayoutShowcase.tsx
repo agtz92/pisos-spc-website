@@ -32,6 +32,8 @@ import type { Product, Category } from '@/lib/graphql';
 import { resolveMediaUrl } from '@/lib/graphql';
 import ProductCard from '@/components/ProductCard';
 import { CategoryFilterBar } from '@/components/CategoryFilterBar';
+import { getStockBadge, type StockConfig } from '@/lib/product-stock';
+import { stripMarkdown, truncate } from '@/lib/strip-markdown';
 
 function formatPrice(price: string | null): string | null {
   if (!price) return null;
@@ -40,11 +42,14 @@ function formatPrice(price: string | null): string | null {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-function FeaturedProduct({ product }: { product: Product }) {
+function FeaturedProduct({ product, stockConfig }: { product: Product; stockConfig: StockConfig | null | undefined }) {
   const imageUrl = resolveMediaUrl(product.coverImage);
   const price = formatPrice(product.price);
   const compareAt = formatPrice(product.compareAtPrice);
-  const inStock = product.stock == null || product.stock > 0;
+  const stock = getStockBadge(product.stock, stockConfig);
+  const previewText = product.shortDescription
+    ? truncate(stripMarkdown(product.shortDescription), 280)
+    : null;
 
   return (
     <article
@@ -72,9 +77,9 @@ function FeaturedProduct({ product }: { product: Product }) {
             </svg>
           </div>
         )}
-        {!inStock && (
-          <span style={{ position: 'absolute', top: 16, left: 16, padding: '0.3rem 0.8rem', borderRadius: 999, background: 'color-mix(in srgb, var(--template-panel, #fff) 92%, transparent)', color: 'var(--template-ink, #161218)', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', backdropFilter: 'blur(6px)', border: '1px solid var(--template-panel-border, #e5e7eb)' }}>
-            Out of stock
+        {stock && !stock.inStock && (
+          <span style={{ position: 'absolute', top: 16, left: 16, padding: '0.3rem 0.8rem', borderRadius: 999, background: 'color-mix(in srgb, var(--template-panel, #fff) 92%, transparent)', color: stock.color, fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', backdropFilter: 'blur(6px)', border: `1px solid ${stock.color}` }}>
+            {stock.label}
           </span>
         )}
       </Link>
@@ -95,9 +100,9 @@ function FeaturedProduct({ product }: { product: Product }) {
           {product.brand && <p style={{ fontSize: '0.82rem', color: 'var(--template-muted-text, #6b7280)', marginTop: '0.3rem', fontWeight: 600 }}>{product.brand}</p>}
         </div>
 
-        {product.description && (
+        {(previewText || product.description) && (
           <p style={{ fontSize: '0.9rem', lineHeight: 1.65, color: 'var(--template-ink, #161218)', opacity: 0.65, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>
-            {product.description}
+            {previewText ?? product.description}
           </p>
         )}
 
@@ -119,16 +124,17 @@ function FeaturedProduct({ product }: { product: Product }) {
 interface Props {
   products: Product[];
   categories: Category[];
+  stockConfig?: StockConfig | null;
 }
 
-export default function ProductsLayoutShowcase({ products, categories }: Props) {
+export default function ProductsLayoutShowcase({ products, categories, stockConfig }: Props) {
   const [first, ...rest] = products;
 
   return (
     <div>
       <CategoryFilterBar categories={categories} basePath="/products/category/" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
-        <FeaturedProduct product={first} />
+        <FeaturedProduct product={first} stockConfig={stockConfig} />
 
         {rest.length > 0 && (
           <div>
@@ -138,7 +144,7 @@ export default function ProductsLayoutShowcase({ products, categories }: Props) 
               <div style={{ flex: 1, height: 1, background: 'var(--template-panel-border, #e5e7eb)' }} />
             </div>
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {rest.map((p) => <ProductCard key={p.slug} product={p} />)}
+              {rest.map((p) => <ProductCard key={p.slug} product={p} stockConfig={stockConfig} />)}
             </div>
           </div>
         )}

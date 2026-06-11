@@ -16,13 +16,8 @@ export interface ModuleData {
   activeModules: string[];
 }
 
-import {
-  PenTool, Utensils, ShoppingBag, Home, Star, Layout, Zap, Globe,
-  BarChart2, Lock, MessageSquare, Mail, Bell, Settings, Users,
-  Heart, Bookmark, Camera, Music, Video, Code, Database, Cloud,
-  Shield, Cpu, Package, Truck, Map, Phone, Search, Lightbulb,
-  Award, CheckCircle, ArrowRight, ChevronRight, type LucideIcon,
-} from 'lucide-react';
+import * as Lucide from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 // ── CSS variable tokens ──────────────────────────────────────────────────────
 
@@ -35,20 +30,42 @@ export const t = {
   mutedPanel:  'var(--template-muted-panel, #f8fafc)',
 };
 
-// ── Icon map ─────────────────────────────────────────────────────────────────
+// ── Icon resolver ────────────────────────────────────────────────────────────
 
-export const ICON_MAP: Record<string, LucideIcon> = {
-  'pen-tool': PenTool, 'utensils': Utensils, 'shopping-bag': ShoppingBag,
-  'home': Home, 'star': Star, 'layout': Layout, 'zap': Zap, 'globe': Globe,
-  'bar-chart': BarChart2, 'lock': Lock, 'message-square': MessageSquare,
-  'mail': Mail, 'bell': Bell, 'settings': Settings, 'users': Users,
-  'heart': Heart, 'bookmark': Bookmark, 'camera': Camera, 'music': Music,
-  'video': Video, 'code': Code, 'database': Database, 'cloud': Cloud,
-  'shield': Shield, 'cpu': Cpu, 'package': Package, 'truck': Truck,
-  'map': Map, 'phone': Phone, 'search': Search, 'lightbulb': Lightbulb,
-  'award': Award, 'check-circle': CheckCircle, 'arrow-right': ArrowRight,
-  'chevron-right': ChevronRight,
+/**
+ * Resolve a kebab-case icon slug (what the CMS persists) to a Lucide component
+ * via a runtime lookup against the whole ``lucide-react`` library — so ANY of
+ * Lucide's icons render without maintaining a hand-written map. Browse slugs at
+ * https://lucide.dev/icons/ and use them verbatim.
+ *
+ * The CMS IconPicker enumerates the same library, so the two stay in sync by
+ * construction (no shared import needed).
+ */
+
+// Legacy slug aliases — kebab slugs older content persisted that no longer map
+// 1:1 to a current Lucide PascalCase export.
+const ICON_ALIASES: Record<string, string> = {
+  'bar-chart': 'BarChart2',
 };
+
+function slugToPascal(slug: string): string {
+  return slug
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join('');
+}
+
+/** Look up a Lucide component for a kebab-case slug, or undefined if unknown. */
+export function lucideForSlug(slug: string): LucideIcon | undefined {
+  if (!slug) return undefined;
+  const key = slug.toLowerCase();
+  const name = ICON_ALIASES[key] ?? slugToPascal(key);
+  const C = (Lucide as Record<string, unknown>)[name];
+  return typeof C === 'function' || (typeof C === 'object' && C !== null)
+    ? (C as LucideIcon)
+    : undefined;
+}
 
 // ── Small shared sub-components ──────────────────────────────────────────────
 
@@ -62,9 +79,29 @@ export function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export function FeatureIcon({ icon, size = 24 }: { icon: string; size?: number }) {
-  const C: LucideIcon | undefined = icon ? ICON_MAP[icon.toLowerCase()] : undefined;
+export function FeatureIcon({ icon, image, size = 24, alt = '' }: {
+  icon?: string;
+  image?: string | null;
+  size?: number;
+  alt?: string;
+}) {
+  // 1. Custom uploaded image always wins.
+  if (image) {
+    return (
+      <img
+        src={image.startsWith('http') ? image : `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${image}`}
+        alt={alt}
+        width={size}
+        height={size}
+        style={{ width: size, height: size, objectFit: 'contain' }}
+      />
+    );
+  }
+  // 2. Lucide icon resolved at runtime from the slug.
+  const C: LucideIcon | undefined = icon ? lucideForSlug(icon) : undefined;
   if (C) return <C size={size} strokeWidth={1.75} />;
+  // 3. Raw text fallback (legacy — emoji or unknown slug).
   if (icon) return <span style={{ fontSize: size }}>{icon}</span>;
+  // 4. Default sparkle.
   return <span style={{ fontSize: size, fontWeight: 700 }}>✦</span>;
 }

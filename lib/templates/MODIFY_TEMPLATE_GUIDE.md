@@ -56,6 +56,16 @@ They render inside every template and read `var(--template-*)`. Adding a hardcod
 `--template-accent`, `--template-accent-strong`, `--template-ink`, `--template-muted-text`, `--template-panel`, `--template-muted-panel`, `--template-panel-border`, `--template-text-on-accent`.
 **Rule:** never remove, rename, or omit one. Shared cards depend on them; missing vars fall back silently to incorrect defaults (`#e5e7eb` etc.) and the bug can ship without erroring.
 
+> **Per-template divergence is allowed — don't "fix" it by adding CMS fields.**
+> A template may *derive* a var instead of exposing an editable color. Example:
+> `futuristic/index.tsx` sets `--template-text-on-accent` from `colors.ink` and
+> has no `footerMeta` var, so futuristic intentionally has NO `textOnAccent` /
+> `footerMeta` entries in `TEMPLATE_COLOR_FIELDS.futuristic`. The rule: a CMS
+> color field must exist only if `templateConfigs.<name>.colors` actually carries
+> that key — otherwise `check-template-contract.mjs` errors ("CMS saves a value
+> the site ignores"). To make a derived var editable, wire the template to read
+> `colors.<key>` first, THEN add the CMS field.
+
 ---
 
 ## What Kind of Change Goes Where

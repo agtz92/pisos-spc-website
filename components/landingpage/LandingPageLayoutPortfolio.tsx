@@ -11,6 +11,13 @@ import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
 import { t, FeatureIcon, StarRating, type ModuleData, type Post, type Review } from './sections';
+import {
+  ProcessTimeline, AwardsGrid, TeamGrid, PressMentions,
+  NewsletterSignup, ContactFormInline, StickySectionNav,
+  ProductsGrid, pickBlock, CustomBlock,
+} from './blocks';
+import LayoutHero from './LayoutHero';
+import LayoutCTA from './LayoutCTA';
 
 export default function LandingPageLayoutPortfolio({ page, modules }: { page: LandingPage; modules: ModuleData }) {
   const heroImage = resolveMediaUrl(page.heroImage);
@@ -19,40 +26,11 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
 
   return (
     <main>
-      {/* ── Hero: asymmetric — image 58%, text 42% ─────────────────────── */}
-      {page.heroEnabled && page.heroHeadline && (
-        <section className="py-20 lg:py-28" style={{ background: t.mutedPanel }}>
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16">
-              {/* Image side — 58% */}
-              {heroImage && (
-                <div className="w-full lg:w-[58%] relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl flex-shrink-0">
-                  <Image src={heroImage} alt={page.heroHeadline} fill className="object-cover" priority />
-                </div>
-              )}
-              {/* Text side — 42% */}
-              <div className="w-full lg:w-[42%] flex flex-col">
-                {page.heroBadge && (
-                  <span data-lp-badge className="inline-block self-start mb-4 px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-full" style={{ background: t.panel, color: t.accent, border: `1px solid ${t.panelBorder}` }}>
-                    {page.heroBadge}
-                  </span>
-                )}
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-[1.12] tracking-tight" style={{ color: t.ink }}>
-                  {page.heroHeadline}
-                </h1>
-                {page.heroSubheadline && <p className="mt-4 text-lg" style={{ color: t.mutedText }}>{page.heroSubheadline}</p>}
-                {page.heroBody && <p className="mt-3 text-base leading-relaxed" style={{ color: t.mutedText, opacity: 0.8 }}>{page.heroBody}</p>}
-                {(page.heroPrimaryCtaText || page.heroSecondaryCtaText) && (
-                  <div className="mt-8 flex flex-wrap gap-4">
-                    {page.heroPrimaryCtaText && <Link data-lp-primary-cta href={page.heroPrimaryCtaUrl || '#'} className="px-7 py-3 font-semibold rounded-xl shadow-lg transition-transform hover:scale-105" style={{ background: t.accent, color: t.panel }}>{page.heroPrimaryCtaText}</Link>}
-                    {page.heroSecondaryCtaText && <Link data-lp-secondary-cta href={page.heroSecondaryCtaUrl || '#'} className="px-7 py-3 font-semibold rounded-xl transition-colors" style={{ border: `2px solid ${t.panelBorder}`, color: t.ink }}>{page.heroSecondaryCtaText}</Link>}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      {/* ── v2 — Sticky section nav (opt-in) ─────────────────────────────── */}
+      <StickySectionNav page={page} />
+
+      {/* ── Hero — shared LayoutHero at "medium" scale respects heroStyle. */}
+      <LayoutHero page={page} scale="medium" />
 
       {/* ── Logo Bar: "Clients We've Worked With" ────────────────────── */}
       {page.logobarEnabled && page.logos.length > 0 && (
@@ -81,8 +59,8 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
         <section className="py-20" style={{ background: t.panel }}>
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center justify-between mb-10">
-              <h2 className="text-3xl font-bold" style={{ color: t.ink }}>Featured Projects</h2>
-              <Link href="/blog" className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>View all work &rarr;</Link>
+              <h2 className="text-3xl font-bold" style={{ color: t.ink }}>{page.blogSectionHeading || 'Featured Projects'}</h2>
+              <Link href={page.blogSectionLinkUrl || '/blog'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'View all work →'}</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
               {topPosts.map((post: Post) => {
@@ -106,6 +84,12 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
         </section>
       )}
 
+      {/* ── v2 — Process / Methodology (between blog work and features) ── */}
+      <ProcessTimeline page={page} />
+
+      {/* ── Products grid (opt-in) ──────────────────────────────────────── */}
+      <ProductsGrid page={page} modules={modules} />
+
       {/* ── Features: accent-topped capability cards ──────────────────── */}
       {page.featuresEnabled && page.features.length > 0 && (
         <section className="py-20" style={{ background: t.mutedPanel }}>
@@ -123,7 +107,7 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
                   <div className="h-1" style={{ background: t.accent }} />
                   <div className="p-6">
                     <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-4" style={{ background: t.mutedPanel, color: t.accent }}>
-                      <FeatureIcon icon={f.icon} size={22} />
+                      <FeatureIcon icon={f.icon} image={f.image} alt={f.title} size={22} />
                     </div>
                     <h3 className="text-lg font-semibold" style={{ color: t.ink }}>{f.title}</h3>
                     <p className="mt-2 leading-relaxed text-sm" style={{ color: t.mutedText }}>{f.description}</p>
@@ -153,11 +137,15 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
         </section>
       )}
 
+      {/* ── v2 — Awards & Team grids ────────────────────────────────────── */}
+      <AwardsGrid page={page} />
+      <TeamGrid page={page} />
+
       {/* ── MODULE: Reviews as client feedback (masonry-style) ────────── */}
       {topReviews.length > 0 && (
         <section className="py-20" style={{ background: t.mutedPanel }}>
           <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-10 text-center" style={{ color: t.ink }}>Client Feedback</h2>
+            <h2 className="text-3xl font-bold mb-10 text-center" style={{ color: t.ink }}>{page.reviewsSectionHeading || 'Client Feedback'}</h2>
             <div className="columns-1 sm:columns-2 gap-6 space-y-6">
               {topReviews.map((r: Review) => (
                 <Link data-lp-review-card key={r.id} href={`/reviews/${r.slug}`} className="block break-inside-avoid rounded-2xl p-6 transition-shadow hover:shadow-lg" style={{ background: t.panel, border: `1px solid ${t.panelBorder}` }}>
@@ -206,21 +194,17 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
         </section>
       )}
 
-      {/* ── CTA: minimal, refined ────────────────────────────────────── */}
-      {page.ctaEnabled && page.ctaHeading && (
-        <section className="py-20" style={{ background: t.mutedPanel }}>
-          <div className="max-w-3xl mx-auto px-4 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold" style={{ color: t.ink }}>{page.ctaHeading}</h2>
-            {page.ctaSubheading && <p className="mt-4 text-lg" style={{ color: t.mutedText }}>{page.ctaSubheading}</p>}
-            {(page.ctaPrimaryText || page.ctaSecondaryText) && (
-              <div className="mt-8 flex flex-wrap justify-center gap-4">
-                {page.ctaPrimaryText && <Link data-lp-primary-cta href={page.ctaPrimaryUrl || '#'} className="px-8 py-3 rounded-xl font-semibold shadow transition-transform hover:scale-105" style={{ background: t.accent, color: t.panel }}>{page.ctaPrimaryText}</Link>}
-                {page.ctaSecondaryText && <Link data-lp-secondary-cta href={page.ctaSecondaryUrl || '#'} className="px-8 py-3 rounded-xl font-semibold transition-colors" style={{ border: `2px solid ${t.panelBorder}`, color: t.ink }}>{page.ctaSecondaryText}</Link>}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      {/* ── v2 — Press mentions + Press kit + Contact form + Newsletter ── */}
+      <PressMentions page={page} />
+      {(() => {
+        const block = pickBlock(page.customBlocks, 'press_kit');
+        return block ? <CustomBlock block={block} /> : null;
+      })()}
+      <ContactFormInline page={page} />
+      {page.newsletter?.enabled && <NewsletterSignup page={page} block={page.newsletter} />}
+
+      {/* ── CTA ────────────────────────────────────────────────────────── */}
+      <LayoutCTA page={page} scale="regular" />
     </main>
   );
 }

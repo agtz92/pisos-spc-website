@@ -163,6 +163,44 @@ export function FuturisticGlobalStyles({ colors }: { colors: FuturisticColors })
         border-radius: 6px !important;
         backdrop-filter: none !important;
       }
+
+      /* ──────────────────────────────────────────────────────────────────
+         Landing Page · "data-lp-on-dark" contract — see ExecutiveGlobalStyles
+         for the rationale. Futuristic is already dark, so panelBackground
+         already trends toward dark — using it as foreground on a dark
+         backdrop would be invisible. Fall back to a neon-tinted white.
+      */
+      .futuristic-shell [data-lp-on-dark] h1,
+      .futuristic-shell [data-lp-on-dark] h2,
+      .futuristic-shell [data-lp-on-dark] h3,
+      .futuristic-shell [data-lp-on-dark] h4,
+      .futuristic-shell [data-lp-on-dark] h5,
+      .futuristic-shell [data-lp-on-dark] h6 {
+        color: color-mix(in srgb, ${colors.accent} 30%, #ffffff) !important;
+      }
+      .futuristic-shell [data-lp-on-dark] [data-lp-badge],
+      .futuristic-shell [data-lp-on-dark] [data-lp-subhead] {
+        color: color-mix(in srgb, ${colors.accent} 30%, #ffffff) !important;
+        opacity: 0.85;
+      }
+      /* Body paragraphs sit one step more muted than subhead so the
+         visual hierarchy reads correctly on dark backdrops. */
+      .futuristic-shell [data-lp-on-dark] [data-lp-body] {
+        color: color-mix(in srgb, ${colors.accent} 30%, #ffffff) !important;
+        opacity: 0.72;
+      }
+      .futuristic-shell [data-lp-on-dark] [data-lp-primary-cta] {
+        background: ${colors.accent} !important;
+        color: ${colors.ink} !important;
+      }
+      .futuristic-shell [data-lp-on-dark] [data-lp-secondary-cta] {
+        color: ${colors.accent} !important;
+        border-color: ${colors.accent} !important;
+        background: transparent !important;
+      }
+      .futuristic-shell [data-lp-on-dark] [data-lp-secondary-cta]:hover {
+        background: color-mix(in srgb, ${colors.accent} 14%, transparent) !important;
+      }
     `}</style>
   );
 }

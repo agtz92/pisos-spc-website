@@ -1446,6 +1446,42 @@ export function RetroGlobalStyles({ colors }: { colors: RetroColors }) {
         .retro-shell [class*="aspect-"] img { transition: none; }
         .retro-shell .retro-nav-link { transition: none; }
       }
+
+      /* ──────────────────────────────────────────────────────────────────
+         Landing Page · "data-lp-on-dark" contract — see ExecutiveGlobalStyles
+         for the rationale.
+      */
+      .retro-shell [data-lp-on-dark] h1,
+      .retro-shell [data-lp-on-dark] h2,
+      .retro-shell [data-lp-on-dark] h3,
+      .retro-shell [data-lp-on-dark] h4,
+      .retro-shell [data-lp-on-dark] h5,
+      .retro-shell [data-lp-on-dark] h6 {
+        color: ${colors.panelBackground} !important;
+      }
+      .retro-shell [data-lp-on-dark] [data-lp-badge],
+      .retro-shell [data-lp-on-dark] [data-lp-subhead] {
+        color: color-mix(in srgb, ${colors.panelBackground} 85%, transparent) !important;
+      }
+      /* Body paragraphs sit one step more muted than subhead so the
+         visual hierarchy reads correctly on dark backdrops. */
+      .retro-shell [data-lp-on-dark] [data-lp-body] {
+        color: color-mix(in srgb, ${colors.panelBackground} 75%, transparent) !important;
+      }
+      .retro-shell [data-lp-on-dark] [data-lp-primary-cta] {
+        background: ${colors.panelBackground} !important;
+        color: ${colors.ink} !important;
+      }
+      .retro-shell [data-lp-on-dark] [data-lp-secondary-cta] {
+        color: ${colors.panelBackground} !important;
+        border-color: color-mix(in srgb, ${colors.panelBackground} 55%, transparent) !important;
+        background: transparent !important;
+      }
+      .retro-shell [data-lp-on-dark] [data-lp-secondary-cta]:hover {
+        background: color-mix(in srgb, ${colors.panelBackground} 12%, transparent) !important;
+        color: ${colors.panelBackground} !important;
+        border-color: ${colors.panelBackground} !important;
+      }
     `}</style>
   );
 }

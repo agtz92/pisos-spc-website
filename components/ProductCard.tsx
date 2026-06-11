@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Product } from '@/lib/graphql';
 import { resolveMediaUrl } from '@/lib/graphql';
+import { getStockBadge, type StockConfig } from '@/lib/product-stock';
+import { stripMarkdown, truncate } from '@/lib/strip-markdown';
 
 function formatPrice(price: string | null): string | null {
   if (!price) return null;
@@ -13,11 +15,22 @@ function formatPrice(price: string | null): string | null {
   }).format(n);
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  stockConfig,
+}: {
+  product: Product;
+  /** Optional — when present, drives the stock pill (text + color). When
+   *  null/missing the badge is hidden. Passed by the list page after a
+   *  single getTenant() fetch. */
+  stockConfig?: StockConfig | null;
+}) {
   const imageUrl = resolveMediaUrl(product.coverImage);
   const price = formatPrice(product.price);
   const compareAt = formatPrice(product.compareAtPrice);
-  const inStock = product.stock == null || product.stock > 0;
+  const stock = getStockBadge(product.stock, stockConfig);
+  // Short description preview (markdown stripped + truncated for compact tile).
+  const previewText = truncate(stripMarkdown(product.shortDescription), 90);
 
   return (
     <article
@@ -54,17 +67,21 @@ export default function ProductCard({ product }: { product: Product }) {
             </svg>
           </div>
         )}
-        {!inStock && (
+        {/* Stock pill — only renders when tenant has the indicator on AND
+            the item is out of stock (in-stock items don't get a tag here
+            to keep tiles visually quiet — see detail page for the
+            in-stock case). Color comes from tenant settings. */}
+        {stock && !stock.inStock && (
           <span
             data-product-badge
             className="absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.08em]"
             style={{
               background: 'color-mix(in srgb, var(--template-panel, #ffffff) 92%, transparent)',
-              color: 'var(--template-ink, #161218)',
-              border: '1px solid var(--template-panel-border, #e5e7eb)',
+              color: stock.color,
+              border: `1px solid ${stock.color}`,
             }}
           >
-            Out of stock
+            {stock.label}
           </span>
         )}
       </Link>
@@ -93,6 +110,15 @@ export default function ProductCard({ product }: { product: Product }) {
           </Link>
         </h2>
         {product.brand && <p className="mt-1 text-sm" style={{ color: 'var(--template-muted-text, #6b7280)' }}>{product.brand}</p>}
+
+        {previewText && (
+          <p
+            className="mt-2 text-sm line-clamp-2"
+            style={{ color: 'var(--template-muted-text, #6b7280)' }}
+          >
+            {previewText}
+          </p>
+        )}
 
         <div className="mt-4 flex items-baseline gap-2">
           {price && (

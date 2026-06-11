@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ExecutiveTemplateColors } from '../config';
 import { MobileNav } from '../MobileNav';
+import { TenantLogo } from '../TenantLogo';
 
 function LogoMark({ color }: { color: string }) {
   return (
@@ -23,11 +24,12 @@ function LogoMark({ color }: { color: string }) {
 
 interface ExecutiveHeaderProps {
   siteName: string;
+  logo?: string | null;
   colors: ExecutiveTemplateColors;
   navItems: { label: string; href: string }[];
 }
 
-export function ExecutiveHeader({ siteName, colors, navItems }: ExecutiveHeaderProps) {
+export function ExecutiveHeader({ siteName, logo, colors, navItems }: ExecutiveHeaderProps) {
   return (
     <header
       className="executive-header sticky top-0 z-30"
@@ -41,12 +43,18 @@ export function ExecutiveHeader({ siteName, colors, navItems }: ExecutiveHeaderP
       />
 
       <div className="mx-auto flex max-w-7xl items-center gap-0 px-4 py-2.5 sm:px-6">
-        <Link href="/" className="executive-logo-link inline-flex items-center gap-2.5 no-underline flex-shrink-0" style={{ color: 'inherit' }}>
-          <LogoMark color={colors.accent} />
-          <span style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-0.02em', color: colors.ink }}>
-            {siteName}
+        {logo ? (
+          <span className="flex-shrink-0">
+            <TenantLogo src={logo} alt={siteName} variant="header" />
           </span>
-        </Link>
+        ) : (
+          <Link href="/" className="executive-logo-link inline-flex items-center gap-2.5 no-underline flex-shrink-0" style={{ color: 'inherit' }}>
+            <LogoMark color={colors.accent} />
+            <span style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-0.02em', color: colors.ink }}>
+              {siteName}
+            </span>
+          </Link>
+        )}
 
         {navItems.length > 0 && (
           <span aria-hidden className="hidden md:block" style={{ width: 1, height: 22, background: colors.panelBorder, margin: '0 1.5rem', flexShrink: 0 }} />

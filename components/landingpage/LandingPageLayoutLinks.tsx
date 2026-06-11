@@ -11,9 +11,13 @@ import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
 import { t, FeatureIcon, StarRating, type ModuleData, type Review } from './sections';
+import { getTenantCached } from '@/lib/modules';
 import {
-  PenTool, Utensils, ShoppingBag, Home, Star,
+  PenTool, Utensils, ShoppingBag, Home, Star, BadgeCheck,
 } from 'lucide-react';
+import {
+  SocialRow, FeaturedLinkCards, pickBlock, CustomBlock,
+} from './blocks';
 
 const MODULE_LINKS: Record<string, { label: string; href: string; Icon: typeof PenTool }> = {
   blog:       { label: 'Blog',        href: '/blog',       Icon: PenTool },
@@ -23,12 +27,15 @@ const MODULE_LINKS: Record<string, { label: string; href: string; Icon: typeof P
   reviews:    { label: 'Reviews',     href: '/reviews',    Icon: Star },
 };
 
-export default function LandingPageLayoutLinks({ page, modules }: { page: LandingPage; modules: ModuleData }) {
+export default async function LandingPageLayoutLinks({ page, modules }: { page: LandingPage; modules: ModuleData }) {
   const heroImage = resolveMediaUrl(page.heroImage);
   const topReviews = modules.reviews.slice(0, 3);
   const activeModuleLinks = modules.activeModules
     .filter((m) => m !== 'landingpage' && MODULE_LINKS[m])
     .map((m) => MODULE_LINKS[m]);
+  // v2 — Tenant verified badge.
+  const tenant = await getTenantCached();
+  const isVerified = tenant?.isVerified === true;
 
   return (
     <main className="min-h-screen" style={{ background: t.mutedPanel }}>
@@ -48,7 +55,12 @@ export default function LandingPageLayoutLinks({ page, modules }: { page: Landin
             </span>
           )}
           {page.heroHeadline && (
-            <h1 className="text-2xl font-extrabold" style={{ color: t.ink }}>{page.heroHeadline}</h1>
+            <h1 className="text-2xl font-extrabold inline-flex items-center justify-center gap-1.5" style={{ color: t.ink }}>
+              {page.heroHeadline}
+              {isVerified && (
+                <BadgeCheck size={20} strokeWidth={2.5} aria-label="Verified" style={{ color: t.accent }} />
+              )}
+            </h1>
           )}
           {page.heroSubheadline && (
             <p className="mt-2 text-sm leading-relaxed" style={{ color: t.mutedText }}>{page.heroSubheadline}</p>
@@ -68,6 +80,12 @@ export default function LandingPageLayoutLinks({ page, modules }: { page: Landin
         </div>
         )}
 
+        {/* ── v2 — Social platform row ─────────────────────────────────── */}
+        <SocialRow page={page} />
+
+        {/* ── v2 — Featured big links ──────────────────────────────────── */}
+        <FeaturedLinkCards page={page} />
+
         {/* ── Features as link buttons ──────────────────────────────────── */}
         {page.featuresEnabled && page.features.length > 0 && (
           <div className="flex flex-col gap-3 mb-8">
@@ -80,7 +98,7 @@ export default function LandingPageLayoutLinks({ page, modules }: { page: Landin
                 style={{ background: t.panel, border: `1px solid ${t.panelBorder}`, color: t.ink }}
               >
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: t.mutedPanel, color: t.accent }}>
-                  <FeatureIcon icon={f.icon} size={20} />
+                  <FeatureIcon icon={f.icon} image={f.image} alt={f.title} size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="block truncate">{f.title}</span>
@@ -181,6 +199,12 @@ export default function LandingPageLayoutLinks({ page, modules }: { page: Landin
             </div>
           </div>
         )}
+
+        {/* ── v2 — Tip jar / Support ──────────────────────────────────────── */}
+        {(() => {
+          const block = pickBlock(page.customBlocks, 'support');
+          return block ? <CustomBlock block={block} /> : null;
+        })()}
 
         {/* ── CTA (bottom) ──────────────────────────────────────────────── */}
         {page.ctaEnabled && page.ctaHeading && (

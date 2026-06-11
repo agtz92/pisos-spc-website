@@ -236,6 +236,48 @@ export function ModernGlobalStyles({ colors }: { colors: ModernTemplateColors })
         .modern-shell article > a:first-child img,
         .modern-shell [class*="aspect-"] img { transition: none; }
       }
+
+      /* ──────────────────────────────────────────────────────────────────
+         Landing Page · "data-lp-on-dark" contract — see ExecutiveGlobalStyles
+         for the full rationale. Layouts mark <section> elements that sit
+         on a dark backdrop; this block flips the heading + chrome to a
+         light palette derived from the template's own panel color, so
+         the result is template-coherent, not raw white.
+      */
+      .modern-shell [data-lp-on-dark] h1,
+      .modern-shell [data-lp-on-dark] h2,
+      .modern-shell [data-lp-on-dark] h3,
+      .modern-shell [data-lp-on-dark] h4,
+      .modern-shell [data-lp-on-dark] h5,
+      .modern-shell [data-lp-on-dark] h6 {
+        color: ${colors.panelBackground} !important;
+      }
+
+      .modern-shell [data-lp-on-dark] [data-lp-badge],
+      .modern-shell [data-lp-on-dark] [data-lp-subhead] {
+        color: color-mix(in srgb, ${colors.panelBackground} 85%, transparent) !important;
+      }
+      /* Body paragraphs sit one step more muted than subhead so the
+         visual hierarchy reads correctly on dark backdrops. */
+      .modern-shell [data-lp-on-dark] [data-lp-body] {
+        color: color-mix(in srgb, ${colors.panelBackground} 75%, transparent) !important;
+      }
+
+      .modern-shell [data-lp-on-dark] [data-lp-primary-cta] {
+        background: ${colors.panelBackground} !important;
+        color: ${colors.ink} !important;
+      }
+
+      .modern-shell [data-lp-on-dark] [data-lp-secondary-cta] {
+        color: ${colors.panelBackground} !important;
+        border-color: color-mix(in srgb, ${colors.panelBackground} 55%, transparent) !important;
+        background: transparent !important;
+      }
+      .modern-shell [data-lp-on-dark] [data-lp-secondary-cta]:hover {
+        background: color-mix(in srgb, ${colors.panelBackground} 12%, transparent) !important;
+        color: ${colors.panelBackground} !important;
+        border-color: ${colors.panelBackground} !important;
+      }
     `}</style>
   );
 }

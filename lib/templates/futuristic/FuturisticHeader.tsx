@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getTemplateConfig } from '../config';
 import { MobileNav } from '../MobileNav';
 import { FuturisticFramePill } from './FuturisticFramePill';
+import { TenantLogo } from '../TenantLogo';
 
 type FuturisticColors = ReturnType<typeof getTemplateConfig<'futuristic'>>['colors'];
 
@@ -27,11 +28,12 @@ function SignalMark({ colors }: { colors: FuturisticColors }) {
 
 interface FuturisticHeaderProps {
   siteName: string;
+  logo?: string | null;
   colors: FuturisticColors;
   navItems: { label: string; href: string }[];
 }
 
-export function FuturisticHeader({ siteName, colors, navItems }: FuturisticHeaderProps) {
+export function FuturisticHeader({ siteName, logo, colors, navItems }: FuturisticHeaderProps) {
   return (
     <header className="px-4 pt-4 sm:px-6 sm:pt-6">
       <div
@@ -43,17 +45,21 @@ export function FuturisticHeader({ siteName, colors, navItems }: FuturisticHeade
         }}
       >
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <Link href="/" className="inline-flex items-center gap-3 no-underline" style={{ color: colors.ink }}>
-            <SignalMark colors={colors} />
-            <span className="min-w-0">
-              <span style={{ display: 'block', color: colors.mutedText, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
-                Adaptive Interface
+          {logo ? (
+            <TenantLogo src={logo} alt={siteName} variant="header" />
+          ) : (
+            <Link href="/" className="inline-flex items-center gap-3 no-underline" style={{ color: colors.ink }}>
+              <SignalMark colors={colors} />
+              <span className="min-w-0">
+                <span style={{ display: 'block', color: colors.mutedText, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
+                  Adaptive Interface
+                </span>
+                <span style={{ display: 'block', fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif', fontWeight: 800, fontSize: 'clamp(1.45rem, 2vw, 1.8rem)', letterSpacing: '-0.04em' }}>
+                  {siteName}
+                </span>
               </span>
-              <span style={{ display: 'block', fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif', fontWeight: 800, fontSize: 'clamp(1.45rem, 2vw, 1.8rem)', letterSpacing: '-0.04em' }}>
-                {siteName}
-              </span>
-            </span>
-          </Link>
+            </Link>
+          )}
 
           <div className="flex flex-wrap items-center gap-2">
             <FuturisticFramePill colors={colors}>{String(navItems.length).padStart(2, '0')} Modules</FuturisticFramePill>

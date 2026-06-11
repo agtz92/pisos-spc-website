@@ -23,6 +23,8 @@ import Link from 'next/link';
 import type { Product, Category } from '@/lib/graphql';
 import { resolveMediaUrl } from '@/lib/graphql';
 import { CategoryFilterBar } from '@/components/CategoryFilterBar';
+import { getStockBadge, type StockConfig } from '@/lib/product-stock';
+import { stripMarkdown, truncate } from '@/lib/strip-markdown';
 
 // ── CSS variable tokens ─────────────────────────────────────────────────────
 
@@ -46,11 +48,14 @@ function formatPrice(price: string | null): string | null {
 
 // ── MacroProductLead ────────────────────────────────────────────────────────
 
-function MacroProductLead({ product }: { product: Product }) {
+function MacroProductLead({ product, stockConfig }: { product: Product; stockConfig: StockConfig | null | undefined }) {
   const img = resolveMediaUrl(product.coverImage);
   const price = formatPrice(product.price);
   const compareAt = formatPrice(product.compareAtPrice);
-  const inStock = product.stock == null || product.stock > 0;
+  const stock = getStockBadge(product.stock, stockConfig);
+  const previewText = product.shortDescription
+    ? truncate(stripMarkdown(product.shortDescription), 240)
+    : null;
 
   return (
     <article data-product-macro-lead className="group">
@@ -71,9 +76,9 @@ function MacroProductLead({ product }: { product: Product }) {
             {product.brand}
           </span>
         )}
-        {!inStock && (
-          <span data-product-badge className="font-semibold" style={{ fontSize: '0.65rem', color: v.mutedText, letterSpacing: '0.05em' }}>
-            Out of stock
+        {stock && !stock.inStock && (
+          <span data-product-badge className="font-semibold" style={{ fontSize: '0.65rem', color: stock.color, letterSpacing: '0.05em' }}>
+            {stock.label}
           </span>
         )}
         {price && (
@@ -131,9 +136,9 @@ function MacroProductLead({ product }: { product: Product }) {
           </div>
         )}
         <div className="flex-1 min-w-0">
-          {product.description && (
+          {(previewText || product.description) && (
             <p style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.05rem)', color: v.mutedText, lineHeight: 1.6 }}>
-              {product.description}
+              {previewText ?? product.description}
             </p>
           )}
           <Link
@@ -152,11 +157,11 @@ function MacroProductLead({ product }: { product: Product }) {
 
 // ── MacroProductRow ─────────────────────────────────────────────────────────
 
-function MacroProductRow({ product, index }: { product: Product; index: number }) {
+function MacroProductRow({ product, index, stockConfig }: { product: Product; index: number; stockConfig: StockConfig | null | undefined }) {
   const img = resolveMediaUrl(product.coverImage);
   const price = formatPrice(product.price);
   const compareAt = formatPrice(product.compareAtPrice);
-  const inStock = product.stock == null || product.stock > 0;
+  const stock = getStockBadge(product.stock, stockConfig);
 
   return (
     <article
@@ -211,9 +216,9 @@ function MacroProductRow({ product, index }: { product: Product; index: number }
                 {product.category.name}
               </span>
             )}
-            {!inStock && (
-              <span data-product-badge style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.1rem 0.4rem', background: v.mutedPanel, color: v.mutedText }}>
-                Out of stock
+            {stock && !stock.inStock && (
+              <span data-product-badge style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.1rem 0.4rem', background: v.mutedPanel, color: stock.color, border: `1px solid ${stock.color}` }}>
+                {stock.label}
               </span>
             )}
           </div>
@@ -275,9 +280,10 @@ function MacroSectionLabel({ label }: { label: string }) {
 interface Props {
   products: Product[];
   categories: Category[];
+  stockConfig?: StockConfig | null;
 }
 
-export default function ProductsLayoutMacro({ products, categories }: Props) {
+export default function ProductsLayoutMacro({ products, categories, stockConfig }: Props) {
   const [lead, ...rest] = products;
 
   return (
@@ -289,7 +295,7 @@ export default function ProductsLayoutMacro({ products, categories }: Props) {
         {/* Lead product */}
         {lead && (
           <div className="mb-16">
-            <MacroProductLead product={lead} />
+            <MacroProductLead product={lead} stockConfig={stockConfig} />
           </div>
         )}
 
@@ -299,7 +305,7 @@ export default function ProductsLayoutMacro({ products, categories }: Props) {
             <MacroSectionLabel label="More Products" />
             <div style={{ borderTop: `1px solid ${v.panelBorder}` }}>
               {rest.map((product, i) => (
-                <MacroProductRow key={product.slug} product={product} index={i + 2} />
+                <MacroProductRow key={product.slug} product={product} index={i + 2} stockConfig={stockConfig} />
               ))}
             </div>
           </div>
