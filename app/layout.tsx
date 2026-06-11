@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { getTenant, resolveMediaUrl } from '@/lib/graphql';
+import { resolveMediaUrl } from '@/lib/graphql';
+import { getTenantCached } from '@/lib/modules';
 import { ModernLayout } from '@/lib/templates/modern';
 import { RetroLayout } from '@/lib/templates/retro';
 import { FuturisticLayout } from '@/lib/templates/futuristic';
@@ -18,9 +19,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  let tenant: Awaited<ReturnType<typeof getTenant>> = null;
+  let tenant: Awaited<ReturnType<typeof getTenantCached>> = null;
   try {
-    tenant = await getTenant();
+    // Shared (cache()) with the page's getTenantCached → one tenant fetch per request.
+    tenant = await getTenantCached();
   } catch {
     // Backend might not be running
   }

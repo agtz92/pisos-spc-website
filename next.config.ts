@@ -2,6 +2,11 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
+    // AVIF first (≈20-30% smaller than WebP) for the image-heavy home/landing
+    // pages. Vercel caches each optimized variant for a year, so the on-demand
+    // transform cost is paid once, not per visitor.
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       {
         protocol: 'http',

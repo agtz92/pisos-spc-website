@@ -1,3 +1,5 @@
+import { cache } from 'react';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
 const TENANT_SLUG = process.env.NEXT_PUBLIC_TENANT_SLUG ?? '';
 
@@ -1056,7 +1058,10 @@ const LANDING_PAGE_FIELDS = `
   customBlocks { id blockType data enabled order }
 `;
 
-export async function getLandingPage(slug: string): Promise<LandingPage | null> {
+// ``cache()`` memoises per-request: ``generateMetadata`` and the page component
+// both call these heavy LP queries, and without it each runs twice (POST fetches
+// are NOT request-memoised by Next). With it, the giant query runs once per render.
+export const getLandingPage = cache(async (slug: string): Promise<LandingPage | null> => {
   const data = await gql<{ landingPage: LandingPage | null }>(
     `query LandingPage($slug: String!) {
       landingPage(slug: $slug) { ${LANDING_PAGE_FIELDS} }
@@ -1065,9 +1070,9 @@ export async function getLandingPage(slug: string): Promise<LandingPage | null> 
     [TAGS.landing],
   );
   return data.landingPage;
-}
+});
 
-export async function getHomepageLandingPage(): Promise<LandingPage | null> {
+export const getHomepageLandingPage = cache(async (): Promise<LandingPage | null> => {
   const data = await gql<{ homepageLandingPage: LandingPage | null }>(
     `query HomepageLandingPage {
       homepageLandingPage { ${LANDING_PAGE_FIELDS} }
@@ -1076,9 +1081,9 @@ export async function getHomepageLandingPage(): Promise<LandingPage | null> {
     [TAGS.landing],
   );
   return data.homepageLandingPage;
-}
+});
 
-export async function getLandingPageByRootSlug(slug: string): Promise<LandingPage | null> {
+export const getLandingPageByRootSlug = cache(async (slug: string): Promise<LandingPage | null> => {
   const data = await gql<{ landingPageByRootSlug: LandingPage | null }>(
     `query LandingPageByRootSlug($slug: String!) {
       landingPageByRootSlug(slug: $slug) { ${LANDING_PAGE_FIELDS} }
@@ -1087,7 +1092,7 @@ export async function getLandingPageByRootSlug(slug: string): Promise<LandingPag
     [TAGS.landing],
   );
   return data.landingPageByRootSlug;
-}
+});
 
 // ── Utility Pages ───────────────────────────────────────────────────────────
 
@@ -1190,7 +1195,7 @@ export async function getUtilityPages(kind?: string): Promise<UtilityPageSummary
   return data.utilityPages;
 }
 
-export async function getUtilityPage(slug: string): Promise<UtilityPage | null> {
+export const getUtilityPage = cache(async (slug: string): Promise<UtilityPage | null> => {
   const data = await gql<{ utilityPage: UtilityPage | null }>(
     `query UtilityPage($slug: String!) {
       utilityPage(slug: $slug) { ${UTILITY_PAGE_FIELDS} }
@@ -1199,4 +1204,4 @@ export async function getUtilityPage(slug: string): Promise<UtilityPage | null> 
     [TAGS.utility],
   );
   return data.utilityPage;
-}
+});

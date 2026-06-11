@@ -1,10 +1,22 @@
-import { getLandingPage } from '@/lib/graphql';
+import { getLandingPage, getLandingPages } from '@/lib/graphql';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { fetchLandingPageModules, renderLandingPage } from '@/lib/render-landing-page';
 import { buildMetadata } from '@/lib/landing-page-seo';
 
 export const revalidate = 86400;
+
+// Prerender every landing page at build so visitors never trigger a blocking
+// on-demand render of the heaviest query in the app. Pages created after build
+// still work (dynamicParams) — cached on first hit, then tag-revalidated.
+export async function generateStaticParams() {
+  try {
+    const pages = await getLandingPages();
+    return pages.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({
   params,

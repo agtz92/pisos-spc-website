@@ -188,6 +188,7 @@ export default function LayoutHero({
                 src={heroImage}
                 alt={page.heroHeadline}
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />
@@ -254,6 +255,7 @@ export default function LayoutHero({
           src={heroImage}
           alt={page.heroHeadline}
           fill
+          sizes="100vw"
           className="object-cover"
           priority
         />
