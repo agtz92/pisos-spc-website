@@ -5,15 +5,6 @@ const TENANT_SLUG = process.env.NEXT_PUBLIC_TENANT_SLUG ?? '';
 
 export const GRAPHQL_URL = `${API_BASE}/t/${TENANT_SLUG}/graphql/`;
 
-/**
- * Hard ceiling for a single GraphQL round-trip. Without it, a hung/asleep
- * backend (e.g. a cold Render instance) would block the render indefinitely.
- * Generous enough to survive a cold start, but bounded so failure is graceful:
- * callers that ``.catch()`` degrade to an empty/404 state instead of hanging.
- * Override with ``GQL_TIMEOUT_MS`` if the backend's cold start runs longer.
- */
-const GQL_TIMEOUT_MS = Number(process.env.GQL_TIMEOUT_MS ?? 30_000);
-
 export interface Category {
   id: string;
   name: string;
@@ -72,26 +63,18 @@ async function gql<T>(
   variables?: Record<string, unknown>,
   tags?: string[],
 ): Promise<T> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), GQL_TIMEOUT_MS);
-
-  let res: Response;
-  try {
-    res = await fetch(GRAPHQL_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables }),
-      next: { revalidate: 86400, tags: tags ?? [] },
-      signal: controller.signal,
-    });
-  } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error(`GraphQL request timed out after ${GQL_TIMEOUT_MS}ms`);
-    }
-    throw err;
-  } finally {
-    clearTimeout(timer);
-  }
+  // NOTE: deliberately no AbortController timeout here. Page/build fetches must
+  // be allowed to complete even when the backend is briefly slow (e.g. under the
+  // burst of concurrent requests `next build` makes while prerendering). A short
+  // abort here would turn slow-but-OK renders into baked 404s / error states.
+  // The per-request 504 risk lived in the EDGE middleware, which has its own
+  // dedicated short timeout — see middleware.ts.
+  const res = await fetch(GRAPHQL_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables }),
+    next: { revalidate: 86400, tags: tags ?? [] },
+  });
 
   if (!res.ok) {
     throw new Error(`GraphQL request failed: ${res.status}`);
