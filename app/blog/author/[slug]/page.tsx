@@ -32,8 +32,10 @@ export default async function AuthorPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  // `getAuthor` throws on a transient backend failure (retryable) rather than
+  // collapsing to null → a baked 404. Only a successful null means not-found.
   const [author, postsResult] = await Promise.all([
-    getAuthor(slug).catch(() => null),
+    getAuthor(slug),
     getPosts({ authorSlug: slug })
       .then((p) => ({ ok: true as const, data: p }))
       .catch((e) => ({ ok: false as const, error: e.message })),

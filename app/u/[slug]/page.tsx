@@ -39,7 +39,10 @@ export default async function UtilityPageRoute({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = await getUtilityPage(slug).catch(() => null);
+  // No `.catch(() => null)`: a transient backend failure must throw (retryable)
+  // instead of being baked as a static 404 by ISR. Only a successful query that
+  // returns null is a genuine not-found.
+  const page = await getUtilityPage(slug);
   if (!page) notFound();
   return renderUtilityPage(page);
 }

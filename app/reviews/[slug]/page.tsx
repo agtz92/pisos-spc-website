@@ -27,8 +27,11 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
   const { slug } = await params;
   // Fetch review + tenant in parallel — tenant powers the per-module layout +
   // color overrides.
+  // `getReview` is not `.catch`-ed: a transient backend failure must throw
+  // (retryable) rather than collapse to null and get baked as a 404 by ISR.
+  // Only a successful null is a genuine not-found. Tenant stays best-effort.
   const [review, tenant] = await Promise.all([
-    getReview(slug).catch(() => null),
+    getReview(slug),
     getTenant().catch(() => null),
   ]);
   if (!review) notFound();

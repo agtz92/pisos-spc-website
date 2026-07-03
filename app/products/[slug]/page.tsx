@@ -29,8 +29,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   // Fetch product + tenant in parallel — tenant powers the stock badge config
   // and the per-module layout + color overrides.
+  // `getProduct` is not `.catch`-ed: a transient backend failure must throw
+  // (retryable) rather than collapse to null and get baked as a 404 by ISR.
+  // Only a successful null is a genuine not-found. Tenant stays best-effort.
   const [product, tenant] = await Promise.all([
-    getProduct(slug).catch(() => null),
+    getProduct(slug),
     getTenant().catch(() => null),
   ]);
   if (!product) notFound();

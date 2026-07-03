@@ -33,8 +33,11 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
   const { slug } = await params;
   // Fetch recipe + tenant in parallel — tenant carries the per-module layout +
   // color overrides.
+  // `getRecipe` is not `.catch`-ed: a transient backend failure must throw
+  // (retryable) rather than collapse to null and get baked as a 404 by ISR.
+  // Only a successful null is a genuine not-found. Tenant stays best-effort.
   const [recipe, tenant] = await Promise.all([
-    getRecipe(slug).catch(() => null),
+    getRecipe(slug),
     getTenant().catch(() => null),
   ]);
   if (!recipe) notFound();

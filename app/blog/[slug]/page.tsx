@@ -42,8 +42,12 @@ export default async function BlogPostPage({
   const { slug } = await params;
   // Fetch post + tenant in parallel — tenant powers the per-module layout +
   // color overrides.
+  // `getPost` is NOT wrapped in `.catch(() => null)`: a transient backend
+  // failure must throw (retryable) instead of being turned into a baked 404 by
+  // ISR. Only a successful query returning null is a genuine not-found. Tenant
+  // is best-effort (powers theming) so it keeps its tolerant catch.
   const [post, tenant] = await Promise.all([
-    getPost(slug).catch(() => null),
+    getPost(slug),
     getTenant().catch(() => null),
   ]);
   if (!post) notFound();

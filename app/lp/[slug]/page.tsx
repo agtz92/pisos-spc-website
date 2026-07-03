@@ -39,7 +39,11 @@ export default async function LandingPagePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = await getLandingPage(slug).catch(() => null);
+  // Do NOT swallow errors into notFound(): a transient backend failure (cold
+  // start, timeout, 5xx) would otherwise be baked as a static 404 by ISR for up
+  // to `revalidate` seconds. Let backend errors throw (retryable 500) — only a
+  // successful query that returns null is a genuine 404.
+  const page = await getLandingPage(slug);
   if (!page) notFound();
   // Module fetch depends on the page's per-section settings, so we must
   // resolve `page` first. Phase 2 changes this from parallel to sequential.

@@ -41,7 +41,11 @@ export default async function RootSlugPage({
   params: Promise<{ rootSlug: string }>;
 }) {
   const { rootSlug } = await params;
-  const page = await getLandingPageByRootSlug(rootSlug).catch(() => null);
+  // Do NOT swallow errors into notFound(): a transient backend failure (cold
+  // start, timeout, 5xx) would otherwise be baked as a static 404 by ISR for up
+  // to `revalidate` seconds. Let backend errors throw (retryable 500) — only a
+  // successful query that returns null is a genuine 404.
+  const page = await getLandingPageByRootSlug(rootSlug);
   if (!page) notFound();
   const modules = await fetchLandingPageModules(page);
   return await renderLandingPage(page, modules);

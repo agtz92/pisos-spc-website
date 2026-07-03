@@ -17,7 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const page = await getHomepageLandingPage().catch(() => null);
+  // No `.catch(() => null)`: a transient backend failure must not be silently
+  // turned into a redirect/empty state that ISR then bakes into the static
+  // prerender. Let backend errors throw (retryable) — only a successful query
+  // that returns null means there's genuinely no homepage → redirect to /blog.
+  const page = await getHomepageLandingPage();
   if (!page) redirect('/blog');
   const modules = await fetchLandingPageModules(page);
   return await renderLandingPage(page, modules);
