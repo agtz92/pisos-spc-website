@@ -10,7 +10,7 @@ import type { LandingPage, LandingFeature, LandingTestimonial, LandingStatItem, 
 import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
-import { t, FeatureIcon, StarRating, type ModuleData, type Post, type Review } from './sections';
+import { t, FeatureIcon, FeatureMedia, StarRating, type ModuleData, type Post, type Review } from './sections';
 import {
   ProcessTimeline, AwardsGrid, TeamGrid, PressMentions,
   NewsletterSignup, ContactFormInline, StickySectionNav,
@@ -105,10 +105,13 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
                 <div data-lp-feature-card key={f.id} className="rounded-2xl overflow-hidden transition-shadow hover:shadow-lg" style={{ background: t.panel, border: `1px solid ${t.panelBorder}` }}>
                   {/* Accent top bar */}
                   <div className="h-1" style={{ background: t.accent }} />
+                  {page.featuresMediaStyle === 'card' && <FeatureMedia icon={f.icon} image={f.image} alt={f.title} />}
                   <div className="p-6">
-                    <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-4" style={{ background: t.mutedPanel, color: t.accent }}>
-                      <FeatureIcon icon={f.icon} image={f.image} alt={f.title} size={22} />
-                    </div>
+                    {page.featuresMediaStyle !== 'card' && (
+                      <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-4" style={{ background: t.mutedPanel, color: t.accent }}>
+                        <FeatureIcon icon={f.icon} image={f.image} alt={f.title} size={22} />
+                      </div>
+                    )}
                     <h3 className="text-lg font-semibold" style={{ color: t.ink }}>{f.title}</h3>
                     <p className="mt-2 leading-relaxed text-sm" style={{ color: t.mutedText }}>{f.description}</p>
                     {f.linkText && f.linkUrl && <Link href={f.linkUrl} className="mt-3 inline-block text-sm font-semibold hover:underline" style={{ color: t.accent }}>{f.linkText} &rarr;</Link>}

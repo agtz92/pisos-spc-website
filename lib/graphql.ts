@@ -821,6 +821,7 @@ export interface LandingPage {
   featuresHeading: string;
   featuresSubheading: string;
   featuresLayout: string;
+  featuresMediaStyle: string;
   testimonialsHeading: string;
   pricingHeading: string;
   pricingSubheading: string;
@@ -989,7 +990,7 @@ const LANDING_PAGE_FIELDS = `
   id title slug status layout rootPath metaTitle metaDescription
   heroBadge heroHeadline heroSubheadline heroBody heroImage heroStyle heroVideoUrl
   heroPrimaryCtaText heroPrimaryCtaUrl heroSecondaryCtaText heroSecondaryCtaUrl
-  featuresHeading featuresSubheading featuresLayout
+  featuresHeading featuresSubheading featuresLayout featuresMediaStyle
   testimonialsHeading
   pricingHeading pricingSubheading
   faqHeading statsHeading logobarHeading
