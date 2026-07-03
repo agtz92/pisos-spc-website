@@ -97,11 +97,24 @@ export function FeatureIcon({ icon, image, size = 24, alt = '' }: {
       />
     );
   }
-  // 2. Lucide icon resolved at runtime from the slug.
+  // 2. Hex color in the icon slot → paint a color swatch instead of the
+  //    raw hex text. Lets a "colors available" grid show real swatches
+  //    with no image upload (3- or 6-digit hex, with or without '#').
+  if (icon && /^#?(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(icon.trim())) {
+    const hex = icon.trim().startsWith('#') ? icon.trim() : `#${icon.trim()}`;
+    return (
+      <span
+        role="img"
+        aria-label={alt || hex}
+        style={{ width: size, height: size, background: hex, borderRadius: Math.max(4, size * 0.2), display: 'inline-block', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.08)' }}
+      />
+    );
+  }
+  // 3. Lucide icon resolved at runtime from the slug.
   const C: LucideIcon | undefined = icon ? lucideForSlug(icon) : undefined;
   if (C) return <C size={size} strokeWidth={1.75} />;
-  // 3. Raw text fallback (legacy — emoji or unknown slug).
+  // 4. Raw text fallback (legacy — emoji or unknown slug).
   if (icon) return <span style={{ fontSize: size }}>{icon}</span>;
-  // 4. Default sparkle.
+  // 5. Default sparkle.
   return <span style={{ fontSize: size, fontWeight: 700 }}>✦</span>;
 }

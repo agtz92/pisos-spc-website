@@ -47,7 +47,7 @@ export default function BentoFeatures({ page }: { page: LandingPage }) {
             >
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
                    style={{ background: t.mutedPanel, color: t.accent }}>
-                <FeatureIcon icon={f.icon} />
+                <FeatureIcon icon={f.icon} image={f.image} alt={f.title} />
               </div>
               <h3 className="text-lg font-semibold" style={{ color: t.ink }}>{f.title}</h3>
               {f.description && (
