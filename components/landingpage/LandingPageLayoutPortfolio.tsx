@@ -100,24 +100,43 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
                 {page.featuresSubheading && <p className="mt-3 text-lg max-w-2xl mx-auto" style={{ color: t.mutedText }}>{page.featuresSubheading}</p>}
               </div>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {page.features.map((f: LandingFeature) => (
-                <div data-lp-feature-card key={f.id} className="rounded-2xl overflow-hidden transition-shadow hover:shadow-lg" style={{ background: t.panel, border: `1px solid ${t.panelBorder}` }}>
-                  {/* Accent top bar */}
-                  <div className="h-1" style={{ background: t.accent }} />
-                  {page.featuresMediaStyle === 'card' && <FeatureMedia icon={f.icon} image={f.image} alt={f.title} />}
-                  <div className="p-6">
-                    {page.featuresMediaStyle !== 'card' && (
-                      <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-4" style={{ background: t.mutedPanel, color: t.accent }}>
-                        <FeatureIcon icon={f.icon} image={f.image} alt={f.title} size={22} />
+            {/* `featuresLayout === 'list'` → single-column stack of horizontal
+                cards (accent moves to a left border); otherwise the 3-col grid.
+                `featuresMediaStyle === 'card'` renders the large media banner in
+                either layout (a fixed-width left thumbnail in list mode). */}
+            <div className={page.featuresLayout === 'list'
+              ? 'flex flex-col gap-6 max-w-4xl mx-auto'
+              : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'}>
+              {page.features.map((f: LandingFeature) => {
+                const isList = page.featuresLayout === 'list';
+                const isCard = page.featuresMediaStyle === 'card';
+                return (
+                  <div
+                    data-lp-feature-card
+                    key={f.id}
+                    className={`rounded-2xl overflow-hidden transition-shadow hover:shadow-lg ${isList ? 'flex flex-col sm:flex-row' : ''}`}
+                    style={{ background: t.panel, border: `1px solid ${t.panelBorder}`, ...(isList ? { borderLeft: `4px solid ${t.accent}` } : {}) }}
+                  >
+                    {/* Accent top bar (grid only; list uses the left border above) */}
+                    {!isList && <div className="h-1" style={{ background: t.accent }} />}
+                    {isCard && (
+                      <div className={isList ? 'sm:w-56 sm:shrink-0' : ''}>
+                        <FeatureMedia icon={f.icon} image={f.image} alt={f.title} />
                       </div>
                     )}
-                    <h3 className="text-lg font-semibold" style={{ color: t.ink }}>{f.title}</h3>
-                    <p className="mt-2 leading-relaxed text-sm" style={{ color: t.mutedText }}>{f.description}</p>
-                    {f.linkText && f.linkUrl && <Link href={f.linkUrl} className="mt-3 inline-block text-sm font-semibold hover:underline" style={{ color: t.accent }}>{f.linkText} &rarr;</Link>}
+                    <div className="p-6">
+                      {!isCard && (
+                        <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-4" style={{ background: t.mutedPanel, color: t.accent }}>
+                          <FeatureIcon icon={f.icon} image={f.image} alt={f.title} size={22} />
+                        </div>
+                      )}
+                      <h3 className="text-lg font-semibold" style={{ color: t.ink }}>{f.title}</h3>
+                      <p className="mt-2 leading-relaxed text-sm" style={{ color: t.mutedText }}>{f.description}</p>
+                      {f.linkText && f.linkUrl && <Link href={f.linkUrl} className="mt-3 inline-block text-sm font-semibold hover:underline" style={{ color: t.accent }}>{f.linkText} &rarr;</Link>}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
