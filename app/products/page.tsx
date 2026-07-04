@@ -2,6 +2,7 @@ import { getProducts, getCategories } from '@/lib/graphql';
 import type { Metadata } from 'next';
 import { getModuleConfig } from '@/lib/templates/config';
 import { getTenantCached } from '@/lib/modules';
+import { buildModuleMetadata } from '@/lib/module-seo';
 import ProductsLayoutGrid from '@/components/products/ProductsLayoutGrid';
 import ProductsLayoutShowcase from '@/components/products/ProductsLayoutShowcase';
 import ProductsLayoutCatalog from '@/components/products/ProductsLayoutCatalog';
@@ -10,7 +11,11 @@ import ProductsLayoutQuickShop from '@/components/products/ProductsLayoutQuickSh
 import ProductsLayoutMacro from '@/components/products/ProductsLayoutMacro';
 
 export const revalidate = 86400;
-export const metadata: Metadata = { title: 'Products' };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantCached().catch(() => null);
+  return buildModuleMetadata(tenant, 'products', 'Products');
+}
 
 const productsConfig = getModuleConfig('products');
 

@@ -3,6 +3,7 @@ import { getReviews } from '@/lib/graphql';
 import type { Metadata } from 'next';
 import { getModuleConfig, colorPalettes } from '@/lib/templates/config';
 import { getTenantCached } from '@/lib/modules';
+import { buildModuleMetadata } from '@/lib/module-seo';
 import ReviewsLayoutFeatured from '@/components/reviews/ReviewsLayoutFeatured';
 import ReviewsLayoutGrid from '@/components/reviews/ReviewsLayoutGrid';
 import ReviewsLayoutList from '@/components/reviews/ReviewsLayoutList';
@@ -11,7 +12,11 @@ import ReviewsLayoutByType from '@/components/reviews/ReviewsLayoutByType';
 import ReviewsLayoutMacro from '@/components/reviews/ReviewsLayoutMacro';
 
 export const revalidate = 86400;
-export const metadata: Metadata = { title: 'Reviews' };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantCached().catch(() => null);
+  return buildModuleMetadata(tenant, 'reviews', 'Reviews');
+}
 
 const reviewsConfig = getModuleConfig('reviews');
 const REVIEW_TYPES = Object.entries(reviewsConfig.copy.reviewTypes).map(([key, label]) => ({ key, label }));

@@ -1,6 +1,7 @@
 import { getPosts, getCategories } from '@/lib/graphql';
 import type { Metadata } from 'next';
 import { getTenantCached } from '@/lib/modules';
+import { buildModuleMetadata } from '@/lib/module-seo';
 import BlogLayoutEditorial from '@/components/blog/BlogLayoutEditorial';
 import BlogLayoutList from '@/components/blog/BlogLayoutList';
 import BlogLayoutMagazine from '@/components/blog/BlogLayoutMagazine';
@@ -9,7 +10,11 @@ import BlogLayoutSpotlight from '@/components/blog/BlogLayoutSpotlight';
 import BlogLayoutMacro from '@/components/blog/BlogLayoutMacro';
 
 export const revalidate = 86400;
-export const metadata: Metadata = { title: 'Blog' };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantCached().catch(() => null);
+  return buildModuleMetadata(tenant, 'blog', 'Blog');
+}
 
 export default async function BlogPage() {
   const tenant = await getTenantCached();

@@ -1,6 +1,7 @@
 import { getRecipes, getCategories } from '@/lib/graphql';
 import type { Metadata } from 'next';
 import { getTenantCached } from '@/lib/modules';
+import { buildModuleMetadata } from '@/lib/module-seo';
 import RecipesLayoutEditorial from '@/components/recipes/RecipesLayoutEditorial';
 import RecipesLayoutGrid from '@/components/recipes/RecipesLayoutGrid';
 import RecipesLayoutCategory from '@/components/recipes/RecipesLayoutCategory';
@@ -9,7 +10,11 @@ import RecipesLayoutVisual from '@/components/recipes/RecipesLayoutVisual';
 import RecipesLayoutMacro from '@/components/recipes/RecipesLayoutMacro';
 
 export const revalidate = 86400;
-export const metadata: Metadata = { title: 'Recipes' };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantCached().catch(() => null);
+  return buildModuleMetadata(tenant, 'recipes', 'Recipes');
+}
 
 export default async function RecipesPage() {
   const tenant = await getTenantCached();

@@ -5,18 +5,36 @@ import { ModernLayout } from '@/lib/templates/modern';
 import { RetroLayout } from '@/lib/templates/retro';
 import { FuturisticLayout } from '@/lib/templates/futuristic';
 import { ExecutiveLayout } from '@/lib/templates/executive';
+import { getSiteSeo } from '@/lib/module-seo';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
 import './globals.css';
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: {
-    template: '%s | Pisos SPC',
-    default: 'Pisos SPC',
-  },
-  description: 'Pisos SPC',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  let tenant: Awaited<ReturnType<typeof getTenantCached>> = null;
+  try {
+    tenant = await getTenantCached();
+  } catch {
+    // Backend might not be running — fall back to a safe default below.
+  }
+
+  const siteName = tenant?.name ?? 'Pisos SPC';
+  const seo = getSiteSeo(tenant);
+
+  const meta: Metadata = {
+    // Child pages set a title segment (e.g. "Products") → "Products | Site Name".
+    // The site-wide SEO title (if set) is the default used when a page sets none.
+    title: {
+      template: `%s | ${siteName}`,
+      default: seo.title ?? siteName,
+    },
+    description: seo.description ?? siteName,
+  };
+  if (!seo.indexable) meta.robots = { index: false, follow: false };
+  if (seo.canonicalUrl) meta.alternates = { canonical: seo.canonicalUrl };
+  return meta;
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let tenant: Awaited<ReturnType<typeof getTenantCached>> = null;

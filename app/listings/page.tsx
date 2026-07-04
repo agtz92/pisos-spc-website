@@ -2,6 +2,7 @@ import { getListings } from '@/lib/graphql';
 import type { Metadata } from 'next';
 import { getModuleConfig } from '@/lib/templates/config';
 import { getTenantCached } from '@/lib/modules';
+import { buildModuleMetadata } from '@/lib/module-seo';
 import ListingsLayoutCards from '@/components/listings/ListingsLayoutCards';
 import ListingsLayoutFeed from '@/components/listings/ListingsLayoutFeed';
 import ListingsLayoutFeatured from '@/components/listings/ListingsLayoutFeatured';
@@ -10,7 +11,11 @@ import ListingsLayoutCompare from '@/components/listings/ListingsLayoutCompare';
 import ListingsLayoutMacro from '@/components/listings/ListingsLayoutMacro';
 
 export const revalidate = 86400;
-export const metadata: Metadata = { title: 'Listings' };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantCached().catch(() => null);
+  return buildModuleMetadata(tenant, 'realestate', 'Listings');
+}
 
 const realestateConfig = getModuleConfig('realestate');
 
