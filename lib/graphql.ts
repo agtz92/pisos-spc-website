@@ -214,7 +214,6 @@ export async function getAuthor(slug: string): Promise<Author | null> {
 export interface TenantInfo {
   name: string;
   logo: string | null;
-  websiteUrl: string;      // canonical public domain — base URL for sitemap/robots
   template: string;
   templateConfig: Record<string, unknown> | null;
   modules: string[];
@@ -241,7 +240,6 @@ export async function getTenant(): Promise<TenantInfo | null> {
       tenant {
         name
         logo
-        websiteUrl
         template
         templateConfig
         modules
@@ -264,6 +262,25 @@ export async function getTenant(): Promise<TenantInfo | null> {
     [TAGS.tenant],
   );
   return data.tenant;
+}
+
+/**
+ * Canonical public domain (``Tenant.website_url``), fetched in its own query so
+ * it is DECOUPLED from ``getTenant`` — the field is newer than some deployed
+ * backends. If the backend predates it, GraphQL rejects the unknown field and
+ * this throws; callers (``lib/site-url.ts``) catch and fall back to the env var
+ * or relative paths. Keeping it out of ``getTenant`` means a stale backend can
+ * never break every page's tenant fetch — only the sitemap/robots base URL.
+ */
+export async function getTenantWebsiteUrl(): Promise<string> {
+  const data = await gql<{ tenant: { websiteUrl: string } | null }>(
+    `query TenantWebsiteUrl {
+      tenant { websiteUrl }
+    }`,
+    undefined,
+    [TAGS.tenant],
+  );
+  return data.tenant?.websiteUrl ?? '';
 }
 
 // ── Redirects ────────────────────────────────────────────────────────────────

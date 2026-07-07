@@ -7,10 +7,11 @@
  *      tenant configured in the CMS (auto, no per-deployment env needed).
  *   3. '' — dev fallback; consumers then emit relative paths.
  *
- * ``getTenantCached`` is React-``cache``d, so calling this alongside the page's
- * own tenant fetch does not trigger a second network request.
+ * ``getTenantWebsiteUrl`` is a dedicated query (not part of ``getTenant``): if a
+ * deployed backend predates the ``website_url`` field, it throws and we fall
+ * back gracefully instead of breaking every page. See its doc in ``graphql.ts``.
  */
-import { getTenantCached } from './modules';
+import { getTenantWebsiteUrl } from './graphql';
 
 /** Strip trailing slashes so we can safely concatenate ``${base}${path}``. */
 export function normalizeBaseUrl(url: string | null | undefined): string {
@@ -20,6 +21,6 @@ export function normalizeBaseUrl(url: string | null | undefined): string {
 export async function resolveSiteUrl(): Promise<string> {
   const fromEnv = normalizeBaseUrl(process.env.NEXT_PUBLIC_SITE_URL);
   if (fromEnv) return fromEnv;
-  const tenant = await getTenantCached().catch(() => null);
-  return normalizeBaseUrl(tenant?.websiteUrl);
+  const fromTenant = await getTenantWebsiteUrl().catch(() => '');
+  return normalizeBaseUrl(fromTenant);
 }
