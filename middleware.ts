@@ -95,5 +95,14 @@ function matchRedirect(
 }
 
 export const config = {
-  matcher: ['/((?!_next/|api/|.*\\..*).*)'],
+  // Run on every request EXCEPT Next internals, API routes, and real static
+  // asset files (matched by known extension). The old `.*\..*` catch-all
+  // excluded ANY path containing a dot, which silently skipped extension-bearing
+  // *page* URLs like `/nosotros.html` or `/producto.php` — the single most
+  // common 301 case (migrating an old .html/.php site). Excluding only known
+  // asset extensions lets those page URLs reach the redirect middleware while
+  // still skipping images/css/js/fonts/sitemap.xml/robots.txt/etc.
+  matcher: [
+    '/((?!_next/|api/|.*\\.(?:ico|png|jpe?g|gif|svg|webp|avif|bmp|css|js|mjs|map|txt|xml|json|woff2?|ttf|otf|eot|pdf|mp4|webm|mov|mp3|wav|ogg|zip|gz|csv)$).*)',
+  ],
 };
