@@ -214,6 +214,7 @@ export async function getAuthor(slug: string): Promise<Author | null> {
 export interface TenantInfo {
   name: string;
   logo: string | null;
+  websiteUrl: string;      // canonical public domain — base URL for sitemap/robots
   template: string;
   templateConfig: Record<string, unknown> | null;
   modules: string[];
@@ -240,6 +241,7 @@ export async function getTenant(): Promise<TenantInfo | null> {
       tenant {
         name
         logo
+        websiteUrl
         template
         templateConfig
         modules
