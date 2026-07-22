@@ -198,7 +198,7 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
             <div className="flex flex-col gap-3">
               {page.faqItems.map((q: LandingFaqItem) => (
                 <details data-lp-faq-item key={q.id} className="group rounded-xl px-6 py-4 open:shadow-md transition-shadow" style={{ background: t.panel, border: `1px solid ${t.panelBorder}` }}>
-                  <summary className="flex justify-between items-center cursor-pointer list-none font-semibold select-none" style={{ color: t.ink }}>{q.question}<span className="ml-4 group-open:rotate-180 transition-transform" style={{ color: t.mutedText }}>&blacktriangledown;</span></summary>
+                  <summary className="flex justify-between items-center cursor-pointer list-none font-semibold select-none" style={{ color: t.ink }}>{q.question}<span className="ml-4 group-open:rotate-180 transition-transform" style={{ color: t.mutedText }}>▾</span></summary>
                   <p className="mt-4 text-sm leading-relaxed" style={{ color: t.mutedText }}>{q.answer}</p>
                 </details>
               ))}
