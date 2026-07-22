@@ -6,7 +6,7 @@
  * pricing tiers, FAQ accordion, client logos, CTA block.
  */
 
-import type { LandingPage, LandingFeature, LandingTestimonial, LandingPricingPlan, LandingFaqItem, LandingLogo } from '@/lib/graphql';
+import type { LandingPage, LandingFeature, LandingTestimonial, LandingPricingPlan, LandingFaqItem, LandingLogo, LandingStatItem } from '@/lib/graphql';
 import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -59,6 +59,20 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
                 );
               })}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Stats — experience / trust band ────────────────────────────── */}
+      {page.statsEnabled && page.statItems.length > 0 && (
+        <section className="py-14" style={{ background: t.mutedPanel, borderTop: `1px solid ${t.panelBorder}`, borderBottom: `1px solid ${t.panelBorder}` }}>
+          <div className="max-w-6xl mx-auto px-4">
+            {page.statsHeading && <h2 className="text-center text-2xl font-bold mb-10" style={{ color: t.ink }}>{page.statsHeading}</h2>}
+            <dl className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
+              {page.statItems.map((s: LandingStatItem) => (
+                <div data-lp-stat-item key={s.id}><dt className="text-4xl font-extrabold" style={{ color: t.accent }}>{s.value}</dt><dd className="mt-1 text-sm font-semibold uppercase tracking-wide" style={{ color: t.mutedText }}>{s.label}</dd></div>
+              ))}
+            </dl>
           </div>
         </section>
       )}

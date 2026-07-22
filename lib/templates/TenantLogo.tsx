@@ -16,6 +16,9 @@ interface TenantLogoProps {
   /** Wrap the image in a Link to "/". Defaults to true. */
   linked?: boolean;
   className?: string;
+  /** Optional CSS size overrides. Fall back to the per-variant defaults. */
+  maxHeight?: string;
+  maxWidth?: string;
 }
 
 const SIZING: Record<TenantLogoProps['variant'], { maxHeight: string; maxWidth: string }> = {
@@ -25,8 +28,9 @@ const SIZING: Record<TenantLogoProps['variant'], { maxHeight: string; maxWidth: 
   footer: { maxHeight: 'clamp(28px, 5vw, 44px)', maxWidth: '180px' },
 };
 
-export function TenantLogo({ src, alt, variant, linked = true, className }: TenantLogoProps) {
-  const { maxHeight, maxWidth } = SIZING[variant];
+export function TenantLogo({ src, alt, variant, linked = true, className, maxHeight: maxHeightProp, maxWidth: maxWidthProp }: TenantLogoProps) {
+  const maxHeight = maxHeightProp ?? SIZING[variant].maxHeight;
+  const maxWidth = maxWidthProp ?? SIZING[variant].maxWidth;
 
   const img = (
     // eslint-disable-next-line @next/next/no-img-element -- logo is a remote tenant asset of unknown intrinsic size; CSS object-fit handles sizing.

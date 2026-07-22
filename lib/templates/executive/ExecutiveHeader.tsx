@@ -45,7 +45,7 @@ export function ExecutiveHeader({ siteName, logo, colors, navItems }: ExecutiveH
       <div className="mx-auto flex max-w-7xl items-center gap-0 px-4 py-2.5 sm:px-6">
         {logo ? (
           <span className="flex-shrink-0">
-            <TenantLogo src={logo} alt={siteName} variant="header" />
+            <TenantLogo src={logo} alt={siteName} variant="header" maxHeight="clamp(48px, 7vw, 72px)" maxWidth="280px" />
           </span>
         ) : (
           <Link href="/" className="executive-logo-link inline-flex items-center gap-2.5 no-underline flex-shrink-0" style={{ color: 'inherit' }}>
