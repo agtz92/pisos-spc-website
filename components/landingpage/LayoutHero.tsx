@@ -25,7 +25,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { resolveMediaUrl, type LandingPage } from '@/lib/graphql';
-import { t } from './sections';
+import { t, newTabProps } from './sections';
 
 export type HeroScale = 'monumental' | 'large' | 'medium' | 'compact';
 
@@ -141,6 +141,7 @@ export default function LayoutHero({
           {page.heroPrimaryCtaText && (
             <Link
               data-lp-primary-cta
+              {...newTabProps(page.heroPrimaryCtaNewTab)}
               href={page.heroPrimaryCtaUrl || '#'}
               className="px-8 py-3.5 font-bold uppercase tracking-widest text-sm rounded-xl transition-opacity hover:opacity-90"
               style={{ background: t.accent, color: t.panel }}
@@ -151,6 +152,7 @@ export default function LayoutHero({
           {page.heroSecondaryCtaText && (
             <Link
               data-lp-secondary-cta
+              {...newTabProps(page.heroSecondaryCtaNewTab)}
               href={page.heroSecondaryCtaUrl || '#'}
               className="px-8 py-3.5 font-bold uppercase tracking-widest text-sm border-2 rounded-xl transition-colors"
               style={{ borderColor: t.panelBorder, color: t.ink }}

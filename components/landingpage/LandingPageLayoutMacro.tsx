@@ -12,7 +12,7 @@ import type { LandingPage, LandingFeature, LandingTestimonial, LandingPricingPla
 import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
-import { t, FeatureIcon, StarRating, type ModuleData, type Post, type Review } from './sections';
+import { t, newTabProps, FeatureIcon, StarRating, type ModuleData, type Post, type Review } from './sections';
 import {
   ReviewsAggregate, PressMentions, NewsletterSignup, TeamGrid,
   ProductsGrid, pickBlock, CustomBlock,
@@ -187,6 +187,7 @@ export default function LandingPageLayoutMacro({ page, modules }: { page: Landin
               </h2>
               <Link
                 href={page.blogSectionLinkUrl || '/blog'}
+                {...newTabProps(page.blogLinkNewTab)}
                 className="font-semibold text-sm uppercase tracking-widest hover:underline flex-shrink-0"
                 style={{ color: t.accent }}
               >

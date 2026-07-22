@@ -10,7 +10,7 @@ import type { LandingPage, LandingFeature, LandingTestimonial, LandingPricingPla
 import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
-import { t, FeatureIcon, FeatureMedia, StarRating, type ModuleData, type Product, type Post, type Review } from './sections';
+import { t, newTabProps, FeatureIcon, FeatureMedia, StarRating, type ModuleData, type Product, type Post, type Review } from './sections';
 import {
   PressMentions, ComparisonTable, ReviewsAggregate, NewsletterSignup,
   BentoFeatures, IndustriesGrid, TeamGrid, ProcessTimeline,
@@ -49,7 +49,7 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center justify-between mb-10">
               <h2 className="text-3xl font-bold" style={{ color: t.ink }}>{page.productsSectionHeading || 'Our Products'}</h2>
-              <Link href={page.productsSectionLinkUrl || '/products'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.productsSectionLinkText || 'View all →'}</Link>
+              <Link href={page.productsSectionLinkUrl || '/products'} {...newTabProps(page.productsLinkNewTab)} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.productsSectionLinkText || 'View all →'}</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {topProducts.map((p: Product) => {
@@ -190,7 +190,7 @@ export default function LandingPageLayoutStorefront({ page, modules }: { page: L
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold" style={{ color: t.ink }}>{page.blogSectionHeading || 'From Our Blog'}</h2>
-              <Link href={page.blogSectionLinkUrl || '/blog'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'Read more →'}</Link>
+              <Link href={page.blogSectionLinkUrl || '/blog'} {...newTabProps(page.blogLinkNewTab)} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'Read more →'}</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {topPosts.map((post: Post) => {

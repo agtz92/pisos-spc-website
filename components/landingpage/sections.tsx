@@ -58,6 +58,13 @@ function slugToPascal(slug: string): string {
 }
 
 /** Look up a Lucide component for a kebab-case slug, or undefined if unknown. */
+/**
+ * Anchor/Link props for opening a link in a new tab. Returns target + a safe
+ * rel when `on` is true, otherwise an empty object (open in same tab).
+ */
+export const newTabProps = (on?: boolean): { target?: '_blank'; rel?: string } =>
+  on ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+
 export function lucideForSlug(slug: string): LucideIcon | undefined {
   if (!slug) return undefined;
   const key = slug.toLowerCase();

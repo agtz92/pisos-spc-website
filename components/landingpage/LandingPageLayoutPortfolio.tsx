@@ -10,7 +10,7 @@ import type { LandingPage, LandingFeature, LandingTestimonial, LandingStatItem, 
 import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
-import { t, FeatureIcon, FeatureMedia, StarRating, type ModuleData, type Post, type Review } from './sections';
+import { t, newTabProps, FeatureIcon, FeatureMedia, StarRating, type ModuleData, type Post, type Review } from './sections';
 import {
   ProcessTimeline, AwardsGrid, TeamGrid, PressMentions,
   NewsletterSignup, ContactFormInline, StickySectionNav,
@@ -60,7 +60,7 @@ export default function LandingPageLayoutPortfolio({ page, modules }: { page: La
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center justify-between mb-10">
               <h2 className="text-3xl font-bold" style={{ color: t.ink }}>{page.blogSectionHeading || 'Featured Projects'}</h2>
-              <Link href={page.blogSectionLinkUrl || '/blog'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'View all work →'}</Link>
+              <Link href={page.blogSectionLinkUrl || '/blog'} {...newTabProps(page.blogLinkNewTab)} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'View all work →'}</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
               {topPosts.map((post: Post) => {

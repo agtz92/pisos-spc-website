@@ -837,6 +837,8 @@ export interface LandingPage {
   heroPrimaryCtaUrl: string;
   heroSecondaryCtaText: string;
   heroSecondaryCtaUrl: string;
+  heroPrimaryCtaNewTab: boolean;
+  heroSecondaryCtaNewTab: boolean;
   featuresHeading: string;
   featuresSubheading: string;
   featuresLayout: string;
@@ -854,6 +856,8 @@ export interface LandingPage {
   ctaSecondaryText: string;
   ctaSecondaryUrl: string;
   ctaStyle: string;
+  ctaPrimaryNewTab: boolean;
+  ctaSecondaryNewTab: boolean;
   heroEnabled: boolean;
   featuresEnabled: boolean;
   testimonialsEnabled: boolean;
@@ -896,9 +900,11 @@ export interface LandingPage {
   blogSectionHeading: string;
   blogSectionLinkText: string;
   blogSectionLinkUrl: string;
+  blogLinkNewTab: boolean;
   productsSectionHeading: string;
   productsSectionLinkText: string;
   productsSectionLinkUrl: string;
+  productsLinkNewTab: boolean;
   reviewsSectionHeading: string;
   recipesSectionHeading: string;
   recipesSectionLinkText: string;
@@ -1009,11 +1015,13 @@ const LANDING_PAGE_FIELDS = `
   id title slug status layout rootPath metaTitle metaDescription
   heroBadge heroHeadline heroSubheadline heroBody heroImage heroStyle heroVideoUrl
   heroPrimaryCtaText heroPrimaryCtaUrl heroSecondaryCtaText heroSecondaryCtaUrl
+  heroPrimaryCtaNewTab heroSecondaryCtaNewTab
   featuresHeading featuresSubheading featuresLayout featuresMediaStyle
   testimonialsHeading
   pricingHeading pricingSubheading
   faqHeading statsHeading logobarHeading
   ctaHeading ctaSubheading ctaPrimaryText ctaPrimaryUrl ctaSecondaryText ctaSecondaryUrl ctaStyle
+  ctaPrimaryNewTab ctaSecondaryNewTab
   heroEnabled featuresEnabled testimonialsEnabled pricingEnabled
   faqEnabled statsEnabled logobarEnabled ctaEnabled
   stickyBarEnabled stickyBarText stickyBarCtaText stickyBarCtaUrl stickyBarEndsAt stickyBarStyle
@@ -1022,8 +1030,8 @@ const LANDING_PAGE_FIELDS = `
   reviewsSectionEnabled reviewsShowAggregate reviewsCount reviewsSource
   recipesSectionEnabled recipesCount
   listingsSectionEnabled listingsCount
-  blogSectionHeading blogSectionLinkText blogSectionLinkUrl
-  productsSectionHeading productsSectionLinkText productsSectionLinkUrl
+  blogSectionHeading blogSectionLinkText blogSectionLinkUrl blogLinkNewTab
+  productsSectionHeading productsSectionLinkText productsSectionLinkUrl productsLinkNewTab
   reviewsSectionHeading
   recipesSectionHeading recipesSectionLinkText recipesSectionLinkUrl
   listingsSectionHeading listingsSectionLinkText listingsSectionLinkUrl

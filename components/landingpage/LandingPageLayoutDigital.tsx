@@ -10,7 +10,7 @@ import type { LandingPage, LandingFeature, LandingTestimonial, LandingPricingPla
 import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
 import Link from 'next/link';
-import { t, StarRating, type ModuleData, type Product, type Post, type Review } from './sections';
+import { t, newTabProps, StarRating, type ModuleData, type Product, type Post, type Review } from './sections';
 import {
   Outcomes, BonusStack, ProcessTimeline, ReviewsAggregate,
   PressMentions, NewsletterSignup,
@@ -74,7 +74,7 @@ export default function LandingPageLayoutDigital({ page, modules }: { page: Land
               })}
             </div>
             <div className="mt-6 text-center">
-              <Link href={page.productsSectionLinkUrl || '/products'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.productsSectionLinkText || 'Browse all resources →'}</Link>
+              <Link href={page.productsSectionLinkUrl || '/products'} {...newTabProps(page.productsLinkNewTab)} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.productsSectionLinkText || 'Browse all resources →'}</Link>
             </div>
           </div>
         </section>
@@ -169,7 +169,7 @@ export default function LandingPageLayoutDigital({ page, modules }: { page: Land
           <div className="max-w-5xl mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold" style={{ color: t.ink }}>{page.blogSectionHeading || 'Free Resources'}</h2>
-              <Link href={page.blogSectionLinkUrl || '/blog'} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'View all →'}</Link>
+              <Link href={page.blogSectionLinkUrl || '/blog'} {...newTabProps(page.blogLinkNewTab)} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>{page.blogSectionLinkText || 'View all →'}</Link>
             </div>
             {/* Horizontal blog cards */}
             <div className="flex flex-col gap-4">

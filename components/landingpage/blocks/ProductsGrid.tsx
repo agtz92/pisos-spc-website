@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { resolveMediaUrl } from '@/lib/graphql';
 import type { LandingPage } from '@/lib/graphql';
 import type { ModuleData, Product } from '../sections';
-import { t } from '../sections';
+import { t, newTabProps } from '../sections';
 
 export default function ProductsGrid({
   page,
@@ -48,7 +48,7 @@ export default function ProductsGrid({
         <div className="flex items-center justify-between mb-10">
           <h2 className="text-3xl font-bold" style={{ color: t.ink }}>{heading}</h2>
           {linkText && (
-            <Link href={linkUrl} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>
+            <Link href={linkUrl} {...newTabProps(page.productsLinkNewTab)} className="text-sm font-semibold hover:underline" style={{ color: t.accent }}>
               {linkText}
             </Link>
           )}

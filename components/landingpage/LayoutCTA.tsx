@@ -31,7 +31,7 @@
  */
 import Link from 'next/link';
 import { type LandingPage } from '@/lib/graphql';
-import { t } from './sections';
+import { t, newTabProps } from './sections';
 
 export type CTAScale = 'monumental' | 'regular';
 
@@ -108,6 +108,7 @@ export default function LayoutCTA({
               {page.ctaPrimaryText && (
                 <Link
                   data-lp-primary-cta
+                  {...newTabProps(page.ctaPrimaryNewTab)}
                   href={page.ctaPrimaryUrl || '#'}
                   className="px-8 py-3 rounded-xl font-semibold shadow transition-opacity hover:opacity-90"
                   style={onDark ? undefined : { background: t.accent, color: t.panel }}
@@ -118,6 +119,7 @@ export default function LayoutCTA({
               {page.ctaSecondaryText && (
                 <Link
                   data-lp-secondary-cta
+                  {...newTabProps(page.ctaSecondaryNewTab)}
                   href={page.ctaSecondaryUrl || '#'}
                   className="px-8 py-3 rounded-xl font-semibold border-2 transition-colors"
                   style={
