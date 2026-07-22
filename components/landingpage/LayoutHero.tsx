@@ -122,7 +122,7 @@ export default function LayoutHero({
       {page.heroSubheadline && (
         <p
           data-lp-subhead
-          className={`${styles.subheadlineClass} max-w-2xl leading-relaxed`}
+          className={`${styles.subheadlineClass} max-w-2xl leading-relaxed ${isSplit ? '' : 'mx-auto'}`}
         >
           {page.heroSubheadline}
         </p>
@@ -130,7 +130,7 @@ export default function LayoutHero({
       {page.heroBody && (
         <p
           data-lp-body
-          className="mt-4 text-base leading-relaxed max-w-2xl"
+          className={`mt-4 text-base leading-relaxed max-w-2xl ${isSplit ? '' : 'mx-auto'}`}
           style={onDark ? undefined : { color: t.mutedText }}
         >
           {page.heroBody}

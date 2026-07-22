@@ -6,6 +6,7 @@
  * pricing tiers, FAQ accordion, client logos, CTA block.
  */
 
+import type { ReactNode } from 'react';
 import type { LandingPage, LandingFeature, LandingTestimonial, LandingPricingPlan, LandingFaqItem, LandingLogo, LandingStatItem } from '@/lib/graphql';
 import { resolveMediaUrl } from '@/lib/graphql';
 import Image from 'next/image';
@@ -18,6 +19,23 @@ import {
 } from './blocks';
 import LayoutHero from './LayoutHero';
 import LayoutCTA from './LayoutCTA';
+
+/** Render an FAQ answer, turning [label](url) markdown links into internal links. */
+function FaqAnswer({ text }: { text: string }) {
+  const nodes: ReactNode[] = [];
+  const re = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) nodes.push(text.slice(last, m.index));
+    nodes.push(
+      <Link key={m.index} href={m[2]} className="font-semibold hover:underline" style={{ color: t.accent }}>{m[1]}</Link>,
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return <>{nodes}</>;
+}
 
 export default function LandingPageLayoutServices({ page, modules }: { page: LandingPage; modules: ModuleData }) {
   const heroImage = resolveMediaUrl(page.heroImage);
@@ -199,7 +217,7 @@ export default function LandingPageLayoutServices({ page, modules }: { page: Lan
               {page.faqItems.map((q: LandingFaqItem) => (
                 <details data-lp-faq-item key={q.id} className="group rounded-xl px-6 py-4 open:shadow-md transition-shadow" style={{ background: t.panel, border: `1px solid ${t.panelBorder}` }}>
                   <summary className="flex justify-between items-center cursor-pointer list-none font-semibold select-none" style={{ color: t.ink }}>{q.question}<span className="ml-4 group-open:rotate-180 transition-transform" style={{ color: t.mutedText }}>▾</span></summary>
-                  <p className="mt-4 text-sm leading-relaxed" style={{ color: t.mutedText }}>{q.answer}</p>
+                  <p className="mt-4 text-sm leading-relaxed" style={{ color: t.mutedText }}><FaqAnswer text={q.answer} /></p>
                 </details>
               ))}
             </div>
