@@ -54,7 +54,7 @@ async function getRedirectsEdge(): Promise<PublicRedirect[]> {
 }
 
 export async function middleware(req: NextRequest) {
-  const { pathname, search } = req.nextUrl;
+  const { pathname, searchParams } = req.nextUrl;
 
   let redirects: PublicRedirect[];
   try {
@@ -69,9 +69,14 @@ export async function middleware(req: NextRequest) {
   for (const r of redirects) {
     const target = matchRedirect(pathname, r);
     if (target !== null) {
-      const dest = target.startsWith('http://') || target.startsWith('https://')
-        ? target + search
-        : new URL(target + search, req.url).toString();
+      // Merge the incoming query (gclid, utm_*…) into the destination instead
+      // of string-appending it: a target that already has a query
+      // (``/products?category=x``) would otherwise become ``?category=x?utm…``
+      // and corrupt the target's own params. Target params win on conflict.
+      const dest = new URL(target, req.url);
+      searchParams.forEach((value, key) => {
+        if (!dest.searchParams.has(key)) dest.searchParams.append(key, value);
+      });
       return NextResponse.redirect(dest, r.statusCode);
     }
   }
